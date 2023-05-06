@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tower unite laser projector simulator</title>
+    <script src="./main.js" type="module"></script>
+    <style>
+      html {
+        background: hsl(25deg 0% 30%);
+      }
+
+      body {
+        display: flex;
+      }
+
+      textarea {
+        flex: 1;
+      }
+
+      canvas {
+        border-radius: 2px;
+        border: 2px solid #666;
+        background: #000;
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="projectorInput">
+size = 500;
+
+# Plot the tornado points in 3d
+sidx = index * 0.15;
+spin = sidx + (time / (sidx ^ 1.2)) * 50;
+heightRand = (sidx ^ 0.6) * 10 -sin(sidx * 10000) * 8;
+
+xp = cos(spin) * sidx;
+yp = heightRand;
+zp = sin(spin) * sidx + 500;
+
+xp = xp + sin(sidx/10 + time) * 10;
+zp = zp + cos(sidx/10 + time) * 10;
+
+
+x' = xp;
+y' = yp + 100;
+
+z = zp;
+x' = x' * size / z;
+y' = y' * size / z - 145;
+
+h = -time*100 + fraction*350;
+v = 2.5 - z/300;
+s = v;
+    </textarea>
+    <canvas id="projectorOutput" width="1000" height="1000"></canvas>
+    <textarea id="projectorInfo"></textarea>
+  </body>
+</html>
