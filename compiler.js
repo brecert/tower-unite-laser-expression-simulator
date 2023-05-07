@@ -9,10 +9,14 @@ const isFunction = (name) => name in fns.id
 
 // not a true bytecode but close enough for out needs
 export class BytecodeCompiler {
-    knownVars = new Set()
+    knownVars = new Map()
 
     static compile(ast) {
-        return new this().compile(ast)
+        const compiler = new this();
+        return {
+            chunks: compiler.compile(ast),
+            varCount: compiler.knownVars.size
+        }
     }
 
     compile(ast) {
@@ -22,7 +26,7 @@ export class BytecodeCompiler {
         switch (ast[0]) {
             case "root": {
                 // return chunks
-                return ast[1].map(expr => this.compile(expr).flat(Infinity))
+                return ast[1].map(expr => Float64Array.from(this.compile(expr).flat(Infinity)))
             }
             case "assign": {
                 const [, type, name, expr] = ast
@@ -36,21 +40,19 @@ export class BytecodeCompiler {
 
                 const assignName = isOutput(name)
                     ? outputs.id[name]
-                    : name
+                    : this.knownVars.size
 
                 // we do bytecode here before knownvars so we don't accidently refer to an invalid variable
                 let bytecode = this.compile(expr)
 
-                if(assignType == instructions.id.SetVar)
-                    this.knownVars.add(name)
+                if(assignType == instructions.id.SetVar && !this.knownVars.has(name))
+                    this.knownVars.set(name, this.knownVars.size)
 
                 // todo: optimize variables names to keep track of stacksize and pull from that as needed
                 return [bytecode, assignType, assignName]
             }
             case "call": {
                 const [, name, args] = ast
-
-                console.log(name, )
 
                 if (!isFunction(name))
                     throw new Error(`Function not found: ${name}`)
@@ -84,7 +86,7 @@ export class BytecodeCompiler {
                     throw new Error(`Variable Not Found: ${name}`)
 
                 let getType = instructions.id.GetVar
-                let getName = name
+                let getName = this.knownVars.get(name)
 
                 if (isInput(name)) {
                     getType = instructions.id.GetIn

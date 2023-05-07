@@ -4,13 +4,14 @@ import { BytecodeVM } from './vm.js';
 import { id as Input } from './constants/inputs.js';
 
 const input = `
-x' = -1;
+z = 2;
+x' = z * 2;
 `
 
 const ast = parse(input)
 const bytecode = BytecodeCompiler.compile(ast)
 
-// console.log(bytecode)
+console.log(bytecode)
 
 const vm = new BytecodeVM({
     [Input.x]: 50,
@@ -24,5 +25,5 @@ const vm = new BytecodeVM({
 
 const out = vm.getOutput(bytecode)
 
-// console.log(vm)
-// console.log(out)
+console.log(vm)
+console.log(out)

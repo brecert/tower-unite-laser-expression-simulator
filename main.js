@@ -35,11 +35,11 @@ class Projector {
     padding: 100,
   }
 
-  constructor(canvas, bytecode) {
+  constructor(canvas, compiledData) {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d', { alpha: false })
     this.ctx.globalCompositeOperation = "screen";
-    this.bytecode = bytecode
+    this.compiledData = compiledData
   }
 
   relativeToAbsolutePos(relPos) {
@@ -57,42 +57,41 @@ class Projector {
     const rows = Array.from(interpolate(this.options.gridHeight, -100, 100))
     const count = this.options.gridWidth * this.options.gridHeight
 
-    const inputs = {
-      [Input.x]: 0,
-      [Input.y]: 0,
-      [Input.index]: 0,
+    const mkInputs = (x = 0, y = 0, index = 0, fraction = 0) => ({
+      [Input.x]: x,
+      [Input.y]: y,
+      [Input.index]: index,
       [Input.count]: count,
-      [Input.fraction]: 0,
+      [Input.fraction]: fraction,
       [Input.pi]: Math.PI,
       [Input.tau]: Math.PI * 2,
       [Input.time]: Date.now() / 1000,
+      // todo: data
       [Input.projectionTime]: 0,
       [Input.projectionStartTime]: 0,
-    }
+    })
 
-    const outputs = {
+    const mkOutputs = () => ({
       [Output["x'"]]: 0,
       [Output["y'"]]: 0,
       [Output.h]: 0,
       [Output.s]: 0,
       [Output.v]: 1,
-    }
+    })
 
-    const vm = new BytecodeVM({ ...inputs }, { ...outputs })
+    const vm = new BytecodeVM(
+      mkInputs(),
+      mkOutputs(),
+      this.compiledData.varCount
+    )
 
     let index = 0;
     for (const rowPos of rows) {
       for (const colPos of cols) {
-        vm.outputs = { ...outputs }
-        vm.inputs = {
-          ...inputs,
-          [Input.x]: colPos,
-          [Input.y]: rowPos,
-          [Input.index]: index++,
-          [Input.fraction]: index / count,
-        }
+        vm.outputs = mkOutputs()
+        vm.inputs = mkInputs(colPos, rowPos, index++, index / count)
 
-        const output = vm.getOutput(this.bytecode)
+        const output = vm.getOutput(this.compiledData.chunks)
         this.renderPoint(output)
       }
     }
@@ -105,13 +104,13 @@ class Projector {
     if (hsl.h < 0) hsl.h -= 90
 
     this.ctx.fillStyle = `hsl(${hsl.h % 360} ${hsl.s * 100}% ${hsl.l * 100}% / ${v * 100}%)`
-    
+
     // this.ctx.beginPath();
     // this.ctx.arc(pos.x, pos.y, this.options.pointSize, 0, 2 * Math.PI);
     // this.ctx.fill();
-    
+
     this.ctx.fillRect(pos.x, pos.y, 10, 10)
-    
+
     // this.ctx.save()
     // this.ctx.globalAlpha = v;
     // this.ctx.filter = `sepia(100%) saturate(500%) hue-rotate(-25deg) hue-rotate(${h*100}%) saturate(${s})`;
@@ -128,8 +127,8 @@ const projector = new Projector(projectorOutput)
 
 function updateBytecode() {
   const ast = parse(projectorInput.value)
-  const bytecode = BytecodeCompiler.compile(ast)
-  projector.bytecode = bytecode
+  const data = BytecodeCompiler.compile(ast)
+  projector.compiledData = data
 }
 updateBytecode()
 
@@ -148,7 +147,7 @@ projectorInput.oninput = () => {
 projector.renderRectangularGrid()
 
 function render() {
-  console.clear()
+  // console.clear()
   if (!parsingError) {
     projector.ctx.clearRect(0, 0, projector.canvas.width, projector.canvas.height)
     try {

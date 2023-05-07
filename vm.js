@@ -32,9 +32,9 @@ class ValueStack {
     }
 }
 
-const vs = new ValueStack(8)
-vs.push(1)
-console.log('e', vs, vs.pop())
+// const vs = new ValueStack(8)
+// vs.push(1)
+// console.log('e', vs, vs.pop())
 // vs.push(1)
 // vs.push(1)
 // vs.take(2)
@@ -44,13 +44,12 @@ console.log('e', vs, vs.pop())
 // console.log({ vs }, vs.get())
 
 export class BytecodeVM {
-    vars = new Map();
-    values = new ValueStack(128);
-
     // inputs and outputs are arrays
-    constructor(inputs, outputs) {
+    constructor(inputs, outputs, varCount, stackSize = 64) {
         this.inputs = inputs;
         this.outputs = outputs;
+        this.values = new ValueStack(stackSize)
+        this.vars = new Float64Array(varCount)
     }
 
     resetStack() {
@@ -67,6 +66,7 @@ export class BytecodeVM {
 
     // no verification checks
     interpretChunk(bytecode) {
+        // console.log(bytecode.length  )
         for (let i = 0; i < bytecode.length; i++) {
             const inst = bytecode[i];
 
@@ -79,15 +79,15 @@ export class BytecodeVM {
                 }
                 // Variables
                 case Op.GetVar: {
-                    const varName = bytecode[++i];
-                    const value = this.vars.get(varName);
+                    const varId = bytecode[++i];
+                    const value = this.vars[varId];
                     this.values.push(value)
                     break
                 }
                 case Op.SetVar: {
-                    const varName = bytecode[++i];
+                    const varId = bytecode[++i];
                     const value = this.values.get(); // we don't pop because `x = 1` is an expression that returns 1.
-                    this.vars.set(varName, value)
+                    this.vars[varId] = value
                     break;
                 }
                 case Op.GetOut: {
