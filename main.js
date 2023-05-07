@@ -1,15 +1,15 @@
-import { Interpreter } from './interpreter.js'
 import { parse } from './parser.js'
+
+import { id as Input } from './constants/inputs.js'
+import { id as Output } from './constants/outputs.js'
+import { BytecodeCompiler } from './compiler.js'
+import { BytecodeVM } from './vm.js'
 
 function hsv2hsl(hsv) {
   const h = hsv.h
   const l = hsv.v * (1 - (hsv.s / 2))
   const s = (l == 0 || l == 1) ? 0 : (hsv.v - l) / Math.min(l, 1 - l)
   return { h, s, l }
-}
-
-function lerp(v0, v1, t) {
-  return (1 - t) * v0 + t * v1;
 }
 
 // evenly space interpolations between start and total
@@ -23,11 +23,11 @@ function* interpolate(count, start, total) {
 // the current time in seconds
 const currentTime = () => (Date.now() / 1000)
 
-const point = (x, y, h, s, v) => ({ x, y, h, s, v })
+// const PointImage = new Image(64, 64)
+// PointImage.src = './point.png'
+// PointImage.onload = console.log
 
 class Projector {
-  laserExpression = parse(projectorInput.value)
-
   options = {
     pointSize: 3,
     gridWidth: 20,
@@ -35,10 +35,11 @@ class Projector {
     padding: 100,
   }
 
-  constructor(canvas) {
+  constructor(canvas, bytecode) {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d', { alpha: false })
     this.ctx.globalCompositeOperation = "screen";
+    this.bytecode = bytecode
   }
 
   relativeToAbsolutePos(relPos) {
@@ -52,46 +53,70 @@ class Projector {
 
   projectionStarted = currentTime()
   renderRectangularGrid() {
-    const constInputs = {
-      pi: Math.PI,
-      tau: Math.PI * 2,
-      time: currentTime(),
-      projectionTime: currentTime() - this.projectionStarted,
-      // don't know the difference yet
-      projectionStartTime: currentTime() - this.projectionStarted
-    }
     const cols = Array.from(interpolate(this.options.gridWidth, -100, 100))
     const rows = Array.from(interpolate(this.options.gridHeight, -100, 100))
     const count = this.options.gridWidth * this.options.gridHeight
 
+    const inputs = {
+      [Input.x]: 0,
+      [Input.y]: 0,
+      [Input.index]: 0,
+      [Input.count]: count,
+      [Input.fraction]: 0,
+      [Input.pi]: Math.PI,
+      [Input.tau]: Math.PI * 2,
+      [Input.time]: Date.now() / 1000,
+      [Input.projectionTime]: 0,
+      [Input.projectionStartTime]: 0,
+    }
+
+    const outputs = {
+      [Output["x'"]]: 0,
+      [Output["y'"]]: 0,
+      [Output.h]: 0,
+      [Output.s]: 0,
+      [Output.v]: 1,
+    }
+
+    const vm = new BytecodeVM({ ...inputs }, { ...outputs })
+
     let index = 0;
     for (const rowPos of rows) {
       for (const colPos of cols) {
-        const inputs = {
-          x: colPos,
-          y: rowPos,
-          index: index++,
-          count: count,
-          fraction: index / count,
-          ...constInputs,
+        vm.outputs = { ...outputs }
+        vm.inputs = {
+          ...inputs,
+          [Input.x]: colPos,
+          [Input.y]: rowPos,
+          [Input.index]: index++,
+          [Input.fraction]: index / count,
         }
-        const output = Interpreter.interpret(this.laserExpression, inputs)
+
+        const output = vm.getOutput(this.bytecode)
         this.renderPoint(output)
       }
     }
   }
 
-  renderPoint({ h, s, v, x, y }) {
-    const hsl = hsv2hsl({ h, s, v })
+  renderPoint({ [Output.h]: h, [Output.s]: s, [Output.v]: v, [Output["x'"]]: x, [Output["y'"]]: y }) {
+    const hsl = hsv2hsl({ h, s, v: Math.min(v, 1) }) // v might be clamped, check later
     const pos = this.relativeToAbsolutePos({ x, y })
 
     if (hsl.h < 0) hsl.h -= 90
 
-    // this.ctx.beginPath();
     this.ctx.fillStyle = `hsl(${hsl.h % 360} ${hsl.s * 100}% ${hsl.l * 100}% / ${v * 100}%)`
+    
+    // this.ctx.beginPath();
     // this.ctx.arc(pos.x, pos.y, this.options.pointSize, 0, 2 * Math.PI);
     // this.ctx.fill();
+    
     this.ctx.fillRect(pos.x, pos.y, 10, 10)
+    
+    // this.ctx.save()
+    // this.ctx.globalAlpha = v;
+    // this.ctx.filter = `sepia(100%) saturate(500%) hue-rotate(-25deg) hue-rotate(${h*100}%) saturate(${s})`;
+    // this.ctx.drawImage(PointImage, pos.x, pos.y)
+    // this.ctx.restore()
   }
 }
 
@@ -99,13 +124,19 @@ const projectorOutput = document.getElementById('projectorOutput')
 const projectorInput = document.getElementById('projectorInput')
 const projectorInfo = document.getElementById('projectorInfo')
 
-
 const projector = new Projector(projectorOutput)
+
+function updateBytecode() {
+  const ast = parse(projectorInput.value)
+  const bytecode = BytecodeCompiler.compile(ast)
+  projector.bytecode = bytecode
+}
+updateBytecode()
 
 let parsingError = false
 projectorInput.oninput = () => {
   try {
-    projector.laserExpression = parse(projectorInput.value)
+    updateBytecode()
     parsingError = false;
   } catch (err) {
     projectorInfo.value = `Parsing Error: ${err.toString()}`
@@ -114,12 +145,12 @@ projectorInput.oninput = () => {
   }
 }
 
-// console.time('render')
 projector.renderRectangularGrid()
-// console.timeEnd('render')
-const render = () => {
+
+function render() {
+  console.clear()
   if (!parsingError) {
-    projector.ctx.clearRect(0, 0, projector.canvas.width, projector.canvas.height);
+    projector.ctx.clearRect(0, 0, projector.canvas.width, projector.canvas.height)
     try {
       projector.renderRectangularGrid()
       projectorInfo.value = ""
@@ -130,4 +161,5 @@ const render = () => {
   }
   requestAnimationFrame(render)
 }
+
 render()

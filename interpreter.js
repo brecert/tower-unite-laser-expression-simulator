@@ -46,29 +46,35 @@ export class Interpreter {
     const interpreter = new this(inputs, vars)
     interpreter.interpret(ast)
     return {
-      x: interpreter.vars.get(`x'`),
-      y: interpreter.vars.get(`y'`),
-      h: interpreter.vars.get(`h`),
-      s: interpreter.vars.get(`s`),
-      v: interpreter.vars.get(`v`),
+      x: interpreter.vars[`x'`],
+      y: interpreter.vars[`y'`],
+      h: interpreter.vars[`h`],
+      s: interpreter.vars[`s`],
+      v: interpreter.vars[`v`],
     }
   }
 
   constructor(inputs, vars) {
-    this.vars = new Map([
-      ...Object.entries(inputs),
-      ...Object.entries(vars)
-    ])
+    this.vars = {
+      ...inputs,
+      ...vars
+    }
     this.inputs = new Set(Object.keys(inputs))
   }
 
   // unsafe and dangerous but should be fine lol
   interpret(ast) {
     if (typeof ast === "number") return ast
-
-    const [type, ...args] = ast
-    if (!Reflect.has(this, type)) throw new Error(`Unsupported AST: ${type}`)
-    return this[type](...args)
+    
+    switch(ast[0]) {
+      case "root": return this.root(ast[1])
+      case "assign": return this.assign(ast[1], ast[2], ast[3])
+      case "call": return this.call(ast[1], ast[2])
+      case "infix": return this.infix(ast[1], ast[2], ast[3])
+      case "prefix": return this.prefix(ast[1], ast[2])
+      case "var": return this.var(ast[1])
+      default: throw new Error(`Unsupported AST: ${type}`)
+    }
   }
 
   root(ast) {
@@ -82,7 +88,7 @@ export class Interpreter {
     if (this.inputs.has(name)) throw new Error(`Invalid Assignment, Cannot Assign to Input Variable: ${name}`)
 
     const value = this.interpret(ast)
-    this.vars.set(name, value)
+    this.vars[name] = value
     return value
   }
 
@@ -102,7 +108,7 @@ export class Interpreter {
   }
 
   var(name) {
-    if (!this.vars.has(name)) throw new Error(`Variable Not Found: ${name}`)
-    return this.vars.get(name)
+    if (!(name in this.vars)) throw new Error(`Variable Not Found: ${name}`)
+    return this.vars[name]
   }
 }
