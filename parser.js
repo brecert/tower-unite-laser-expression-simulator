@@ -1,6 +1,16 @@
 import { lang, empty } from 'https://unpkg.com/parser-lang@0.4.0/main.mjs?module';
 
-const infixAst = ([l ,, op ,, r]) => ['infix', op, l, r]
+const infixAst = ([l, r]) => {
+  if(r.length === 0) {
+    return l
+  } else {
+    const x = r.reduce((acc, curr) => {
+      return ['infix', curr[1], acc, curr[3]]
+    }, l)
+    // console.log({ l, x })
+    return x
+  }
+}
 const prefixAst = ([op ,, r]) => ['prefix', op, r]
 
 // while we can assign to any expr, only ident seems to do anything so we'll just do checks to simplify error checking and parsing
@@ -19,29 +29,30 @@ export const parser = lang`
     = ident o '(' o ')' > ${a => ['call', a[0], []]}
     | ident o '(' o Expression (o ',' o Expression)* o ')' > ${a => ['call', a[0], [a[4], ...a[5].map(a => a[3])]]}
     ;
-    
-  InfixOpAll
-    = InfixOpAdd o ('<'|'>'|'<='|'>='|'=='|'&'|'|') o InfixOpAll > ${infixAst}
-    | InfixOpAdd
-    ;
-  
+
+
   Assign
     = variable o '=' o Expression > ${([l ,, op ,, r]) => ['assign', ...l, r]}
     ;
     
+  InfixOpAll
+    = InfixOpCmp (o ('&'|'|') o InfixOpAll)* > ${infixAst}
+    ;
+
+  InfixOpCmp
+    = InfixOpPow (o ('<='|'>='|'=='|'<'|'>') o InfixOpCmp)* > ${infixAst}
+    ;
+
+  InfixOpPow
+    = InfixOpAdd (o ('^'|'%') o InfixOpPow)* > ${infixAst}
+    ;
+
   InfixOpAdd
-    = InfixOpMul o ('+'|'-') o InfixOpAdd > ${infixAst}
-    | InfixOpMul
+    = InfixOpMul (o ('+'|'-') o InfixOpAdd)* > ${infixAst}
     ;
     
   InfixOpMul
-    = InfixOpPow o ('*'|'/') o InfixOpMul > ${infixAst}
-    | InfixOpPow
-    ;
-    
-  InfixOpPow
-    = Base o ('^'|'%') o InfixOpPow > ${infixAst}
-    | Base
+    = Base (o ('*'|'/') o InfixOpMul)* > ${infixAst}
     ;
     
   Base
@@ -49,7 +60,7 @@ export const parser = lang`
     | Call
     | FloatExpr
     | variable
-    | '-' Base > ${a => ['prefix', '-', a[1]]}
+    | '-' o Base > ${a => ['prefix', '-', a[2]]}
     ;
     
   FloatExpr
@@ -73,9 +84,6 @@ export const parser = lang`
 
 export const parse = (input) =>
     parser.Root.tryParse(input.replaceAll(/#.+/g, ''))
-  
-
-
 
 
 
