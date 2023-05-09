@@ -13,10 +13,7 @@ export class BytecodeCompiler {
 
     static compile(ast) {
         const compiler = new this();
-        return {
-            chunks: compiler.compile(ast),
-            varCount: compiler.knownVars.size
-        }
+        return compiler.compile(ast)
     }
 
     compile(ast) {
@@ -25,8 +22,14 @@ export class BytecodeCompiler {
 
         switch (ast[0]) {
             case "root": {
-                // return chunks
-                return ast[1].map(expr => Float64Array.from(this.compile(expr).flat(Infinity)))
+                const chunks = ast[1].flatMap(expr => {
+                    // todo: chunk info like size and var count
+                    const chunk = this.compile(expr).flat(Infinity)
+                    chunk.unshift(instructions.id.Chunk)
+                    return chunk
+                })
+                chunks.push(instructions.id.End)
+                return new Float64Array(chunks)
             }
             case "assign": {
                 const [, type, name, expr] = ast
@@ -40,7 +43,7 @@ export class BytecodeCompiler {
 
                 const assignName = isOutput(name)
                     ? outputs.id[name]
-                    : this.knownVars.size
+                    : this.knownVars.get(name) ?? this.knownVars.size
 
                 // we do bytecode here before knownvars so we don't accidently refer to an invalid variable
                 let bytecode = this.compile(expr)

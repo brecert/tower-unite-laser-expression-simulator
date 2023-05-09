@@ -4,6 +4,7 @@ import { id as Input } from './constants/inputs.js'
 import { id as Output } from './constants/outputs.js'
 import { BytecodeCompiler } from './compiler.js'
 import { BytecodeVM } from './vm.js'
+import { interpret } from './vm/src/index.js'
 
 function hsv2hsl(hsv) {
   const h = hsv.h
@@ -20,8 +21,8 @@ function* interpolate(count, start, total) {
   }
 }
 
-// the current time in seconds
-const currentTime = () => (Date.now() / 1000)
+// the current time in seconds since the beginning of the day
+const dayInSeconds = () => ((Date.now() % 86400000) / 1000)
 
 // const PointImage = new Image(64, 64)
 // PointImage.src = './point.png'
@@ -51,64 +52,39 @@ class Projector {
     }
   }
 
-  projectionStarted = currentTime()
+  // todo: there will be bugs with the day changing but not this
+  // maybe that's accurate though?
+  projectionStartTime = dayInSeconds()
   renderRectangularGrid() {
     const cols = Array.from(interpolate(this.options.gridWidth, -100, 100))
-    const rows = Array.from(interpolate(this.options.gridHeight, -100, 100))
+    const rows = Array.from(interpolate(this.options.gridHeight, 100, -100))
     const count = this.options.gridWidth * this.options.gridHeight
-
-    const mkInputs = (x = 0, y = 0, index = 0, fraction = 0) => ({
-      [Input.x]: x,
-      [Input.y]: y,
-      [Input.index]: index,
-      [Input.count]: count,
-      [Input.fraction]: fraction,
-      [Input.pi]: Math.PI,
-      [Input.tau]: Math.PI * 2,
-      [Input.time]: Date.now() / 1000,
-      // todo: data
-      [Input.projectionTime]: 0,
-      [Input.projectionStartTime]: 0,
-    })
-
-    const mkOutputs = () => ({
-      [Output["x'"]]: 0,
-      [Output["y'"]]: 0,
-      [Output.h]: 0,
-      [Output.s]: 0,
-      [Output.v]: 1,
-    })
-
-    const vm = new BytecodeVM(
-      mkInputs(),
-      mkOutputs(),
-      this.compiledData.varCount
-    )
+    const time = dayInSeconds()
 
     let index = 0;
     for (const rowPos of rows) {
       for (const colPos of cols) {
-        vm.outputs = mkOutputs()
-        vm.inputs = mkInputs(colPos, rowPos, index++, index / count)
-
-        const output = vm.getOutput(this.compiledData.chunks)
-        this.renderPoint(output)
+        const outputs = interpret(this.bytecode, {
+          x: colPos,
+          y: rowPos,
+          index: index++,
+          count: count - 1,
+          time: time,
+          projectionStartTime: this.projectionStartTime,
+        });
+        // console.log(outputs)
+        this.renderPoint(outputs)
       }
     }
   }
 
-  renderPoint({ [Output.h]: h, [Output.s]: s, [Output.v]: v, [Output["x'"]]: x, [Output["y'"]]: y }) {
+  renderPoint({ h, s, v, x, y }) {
     const hsl = hsv2hsl({ h, s, v: Math.min(v, 1) }) // v might be clamped, check later
     const pos = this.relativeToAbsolutePos({ x, y })
 
-    if (hsl.h < 0) hsl.h -= 90
+    if (hsl.h < 0) hsl.h -= 120
 
     this.ctx.fillStyle = `hsl(${hsl.h % 360} ${hsl.s * 100}% ${hsl.l * 100}% / ${v * 100}%)`
-
-    // this.ctx.beginPath();
-    // this.ctx.arc(pos.x, pos.y, this.options.pointSize, 0, 2 * Math.PI);
-    // this.ctx.fill();
-
     this.ctx.fillRect(pos.x, pos.y, 10, 10)
 
     // this.ctx.save()
@@ -127,8 +103,8 @@ const projector = new Projector(projectorOutput)
 
 function updateBytecode() {
   const ast = parse(projectorInput.value)
-  const data = BytecodeCompiler.compile(ast)
-  projector.compiledData = data
+  const bytecode = BytecodeCompiler.compile(ast)
+  projector.bytecode = bytecode
 }
 updateBytecode()
 
@@ -137,6 +113,8 @@ projectorInput.oninput = () => {
   try {
     updateBytecode()
     parsingError = false;
+    // projector.ctx.clearRect(0, 0, projector.canvas.width, projector.canvas.height)
+    // projector.renderRectangularGrid()
   } catch (err) {
     projectorInfo.value = `Parsing Error: ${err.toString()}`
     console.error(err)

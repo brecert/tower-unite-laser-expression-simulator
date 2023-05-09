@@ -1,0 +1,6 @@
+node_modules
+build/*
+!build/release.js
+!build/release.d.ts
+!build/release.wasm
+!build/release.wasm.map
