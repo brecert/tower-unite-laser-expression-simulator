@@ -1,6 +1,5 @@
 import { parse } from './parser.js'
 import { BytecodeCompiler } from "./compiler.js";
-import { BytecodeVM } from './vm.js';
 import { id as Input } from './constants/inputs.js';
 import { id as Instruction, infix as Infix, prefix as Prefix } from './constants/instructions.js';
 import { interpret } from './vm/src/index.js';

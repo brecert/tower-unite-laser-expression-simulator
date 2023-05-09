@@ -70,31 +70,6 @@ const
   Fn_lerp   : u8 = 15,
   Fn_dbg    : u8 = 16
 
-// @inline
-// function getFnArity(fnId: u32): u32 {
-//   switch(fnId) {
-//     case Fn_sin:
-//     case Fn_acos:
-//     case Fn_asin:
-//     case Fn_atan:
-//     case Fn_sqrt:
-//     case Fn_floor:
-//     case Fn_ceil:
-//     case Fn_round:
-//     case Fn_abs:
-//     case Fn_dbg:
-//       return 1
-//     case Fn_atan2:
-//     case Fn_min:
-//     case Fn_max:
-//       return 2
-//     case Fn_if:
-//     case Fn_lerp:
-//       return 3
-//     default: abort(); return 0
-//   }
-// }
-
 // todo: this may need to moved eventually for optimized block sizing
 const stack = new StaticArray<f64>(64)
 

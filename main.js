@@ -3,7 +3,6 @@ import { parse } from './parser.js'
 import { id as Input } from './constants/inputs.js'
 import { id as Output } from './constants/outputs.js'
 import { BytecodeCompiler } from './compiler.js'
-import { BytecodeVM } from './vm.js'
 import { interpret } from './vm/src/index.js'
 
 function hsv2hsl(hsv) {
