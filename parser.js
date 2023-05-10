@@ -82,6 +82,8 @@ export const parser = lang`
   empty = @${empty()};
 `
 
+// todo: identifier's can hold unicode characters / emojis, it may be a blacklist rather than a whitelist
+
 export const parse = (input) =>
     parser.Root.tryParse(input.replaceAll(/#.+/g, ''))
 

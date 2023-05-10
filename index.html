@@ -9,28 +9,85 @@
     <script src="./main.js" type="module"></script>
   </head>
   <body>
-    <!-- todo: better screenreader support -->
-    <section class="input-info">
-      <form class="actions" id="inputActions">
-        <label style="border-inline-end: 0;">
-          Laser Coordinates
-          <select>
-            <option name="Rectangular Grid">Rectangular Grid</option>
-            <!-- <option>Line Shape</option>
-            <option>Plus Shape</option>
-            <option>Circle Shape</option>
-            <option>Square Shape</option> -->
-          </select>
-        </label>
-        <label class="flex-end">
-          Grid Size
-          <input type="number" max="20" min="0" value="20" style="width: 5ch;" id="sizeX">
-          x
-          <input type="number" max="20" min="0" value="20" style="width: 5ch;" id="sizeY">
-        </label>
+    <dialog id="helpModal">
+      <div>
+        <h1 id="tower-unite-laser-expression-simulator">Tower Unite Laser
+          Expression Simulator</h1>
+          <p>This is a simulator for <a
+          href="https://steamcommunity.com/sharedfiles/filedetails/?id=1136940994">Tower
+          Unite's Laser Expression Language</a>.</p>
+          <p>The simulator supports a subset of Tower Unite's behaviors, meaning
+          that any programs written here should work in Tower Unite but not every
+          program written in Tower Unite will work on here.</p>
+          <p>The reason for this is that Tower Unite's expression language has a
+          lot of odd and undefined behaviors, that people likely should not be
+          relying on anyways.</p>
+          <p>If you'd like to learn more about Tower Unite's Laser Expression
+          Language you can read the <a
+          href="https://steamcommunity.com/sharedfiles/filedetails/?id=1136940994">official
+          guide</a>.</p>
+          <h2 id="quirks-oddities-and-undefined-behavior">quirks, oddities, and
+          undefined behavior</h2>
+          <p>Tower Unite's expression language has a lot of odd behavior that may
+          not be immediately obvious.</p>
+          <p>There's more behavior that are not listed. if there's information
+          that's wrong or not listed, please feel free to let me know on the forum
+          post or by <a
+          href="https://github.com/brecert/tower-unite-laser-expression-simulator/issues/new">creating
+          a github issue</a>.</p>
+          <h3 id="unsupported-behavior">Unsupported Behavior</h3>
+          <ul>
+          <li>any expression can be assigned to without an error, but it seems
+          only identifiers alone will actually do anything.
+          <code>1 = x;</code></li>
+          <li>right parenthesis can be inserted almost anywhere without error, the
+          language will skip them</li>
+          <li>many of the operators seem to be parsed like infix operators
+          <code>-(2 * 3)</code> is the same as <code>(2 * 3)-</code></li>
+          <li>operators don't need the left and right to be valid,
+          <code>x' = /1;</code> is a valid statement, and so is
+          <code>y' = 10*;</code></li>
+          <li>there can be multiple expressions in a single expression. I'm unsure
+          what the behavior is for this.</li>
+          </ul>
+          <h3 id="supported-behavior">Supported Behavior</h3>
+          <ul>
+          <li>operator precedence may not always be what you expect. for example,
+          <code>!</code> will capture everything to the right of it, rather than
+          the nearest identifier or expression. operator precedence seems to be
+          based on the the order they appear in <a
+          href="https://steamcommunity.com/sharedfiles/filedetails/?id=1136940994">official
+          guide's</a> operator table.</li>
+          </ul>                
+      </div>
+      <form method="dialog">
+        <button>Close</button>
       </form>
-    
-      <textarea id="projectorInput" class="input" spellcheck="false">
+    </dialog>
+
+    <main>
+      <!-- todo: better screenreader support -->
+      <section class="input-info">
+        <form class="actions" id="inputActions">
+          <label style="border-inline-end: 0;">
+            Laser Coordinates
+            <select>
+              <option name="Rectangular Grid">Rectangular Grid</option>
+              <!-- <option>Line Shape</option>
+              <option>Plus Shape</option>
+              <option>Circle Shape</option>
+              <option>Square Shape</option> -->
+            </select>
+          </label>
+          <label class="flex-end">
+            Grid Size
+            <input type="number" max="20" min="0" value="20" style="width: 5ch;" id="sizeX">
+            x
+            <input type="number" max="20" min="0" value="20" style="width: 5ch;" id="sizeY">
+          </label>
+        </form>
+      
+        <textarea id="projectorInput" class="input" spellcheck="false">
 size = 500;
 
 # Plot the tornado points in 3d
@@ -56,35 +113,37 @@ y' = y' * size / z - 145;
 h = -time*100 + fraction*350;
 v = 2.5 - z/300;
 s = v;
-</textarea>    
-    </section>
-    <div class="output-info" style="flex: 2">
-      <form class="actions" id="outputActions">
-        <label>
-          Run
-          <input type="checkbox" id="run" checked>
-        </label>
-        <label class="flex-1">
-          Scale X
-          <input class="input-fill" type="range" min="-1" max="1" step="any" value="1" id="scaleX">
-        </label>
-        <label class="flex-1">
-          Scale Y
-          <input class="input-fill" type="range" min="-1" max="1" step="any" value="1" id="scaleY">
-        </label>
-        <label class="flex-1">
-          Rotation
-          <input class="input-fill" type="range" min="0" max="1" step="any" value="0" id="rotation">
-        </label>
-        <!-- maybe menu? -->
-        <button type="button" class="flex-end" style="flex: 0; flex-basis: 8ch">🛈 Help</button>
-      </form>
-      <section class="display">
-        <canvas id="projectorDisplay" width="1024" height="1024"></canvas>
+</textarea>
       </section>
-      <output class="outputs ">
-        <textarea class="output" id="projectorLogs" spellcheck="false"></textarea>
-      </output>  
-    </div>
+      <section class="output-info" style="flex: 2">
+        <form class="actions" id="outputActions">
+          <label>
+            Run
+            <input type="checkbox" id="run" checked>
+          </label>
+          <label class="flex-1">
+            Scale X
+            <input class="input-fill" type="range" min="-1" max="1" step="any" value="1" id="scaleX">
+          </label>
+          <label class="flex-1">
+            Scale Y
+            <input class="input-fill" type="range" min="-1" max="1" step="any" value="1" id="scaleY">
+          </label>
+          <label class="flex-1">
+            Rotation
+            <input class="input-fill" type="range" min="0" max="1" step="any" value="0" id="rotation">
+          </label>
+          <!-- maybe menu? -->
+          <button type="button" class="flex-end" style="flex: 0; flex-basis: 8ch" onclick="helpModal.showModal()">🛈 Help</button>
+        </form>
+        <section class="display">
+          <canvas id="projectorDisplay" width="1024" height="1024"></canvas>
+        </section>
+        <output class="outputs ">
+          <textarea class="output" id="projectorLogs" spellcheck="false"></textarea>
+        </output>  
+      </section>
+    </main>
+
   </body>
 </html>

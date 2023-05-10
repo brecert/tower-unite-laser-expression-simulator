@@ -35,6 +35,15 @@ textarea {
   background: var(--textarea-bg);
 }
 
+dialog {
+  /* yes.. I'm aware */
+  z-index: 5;
+
+  width: 1024px;
+  min-height: 418px;
+  align-self: center;
+}
+
 /* Utility Styles */
 
 .flex-end {
@@ -51,20 +60,23 @@ textarea {
 }
 
 /* Styles */
-html, body {
+html, body, main {
   height: 100%;
   margin: 0;
   padding: 0;
+
+  contain: strict;
+  overflow: auto;
 }
 
-body {
+main {
   display: flex;
   gap: 8px;
   
   padding: 8px;
 }
 
-body > * {
+main > * {
   flex: 1;
 }
 
