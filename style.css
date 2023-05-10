@@ -1,0 +1,177 @@
+/* Globals  */
+
+:root {
+  color-scheme: light;
+  
+  --bg-front-2: #efefef;
+  --bg-front-3: #aaa;
+  --bg-front-4: #999; 
+  --bg-back-2: #fefefe;
+  
+  --border-size: 2px;
+  --border-color: #ccc;
+  --textarea-bg: var(--bg-back-2);
+  
+  font-family: sans-serif, system-ui;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    
+    --bg-front-2: #101010;
+    --bg-front-3: #303030;
+    --bg-front-4: #606060; 
+    --bg-back-2: #101010;
+    --border-color: #444;
+    
+    --textarea-bg: #202022;
+  }
+}
+
+* { box-sizing: border-box; }
+
+textarea {
+  background: var(--textarea-bg);
+}
+
+/* Utility Styles */
+
+.flex-end {
+  margin-inline-start: auto;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.input-fill {
+  width: 100%;
+  min-width: 40px;
+}
+
+/* Styles */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  gap: 8px;
+  
+  padding: 8px;
+}
+
+body > * {
+  flex: 1;
+}
+
+.actions {
+  display: flex;
+  min-height: 5ch;
+  
+  place-items: center;
+  
+  background: var(--bg-front-2);
+  
+  overflow: auto;
+  contain: strict;
+}
+
+.actions > label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+    
+  background: inherit;  
+  white-space: nowrap;
+}
+
+.actions > button {
+  display: grid;
+  align-content: end;
+  
+  height: 100%;
+  width: 100%;
+  
+  padding-inline: 2ch;
+  
+  background: var(--bg-front-2);
+  
+  border: 0;
+  border-radius: 0;
+  
+  font: inherit;
+  
+  cursor: pointer;
+}
+
+.actions > button:hover {
+  background: var(--bg-front-3);
+}
+
+.actions > button:active {
+  background: var(--bg-front-4);
+}
+
+.actions > :is(button, label) {
+  height: 100%;
+  padding: 8px;
+}
+
+.actions > :is(button, label):not(:last-child) {
+  border-inline-end: var(--border-size) solid var(--border-color);
+}
+
+.input-info,
+.output-info {
+  display: flex;
+  flex-direction: column;
+  
+  border: var(--border-size) solid var(--border-color);
+  border-radius: 4px;
+}
+
+.display {
+  flex: 1;
+  
+  contain: strict;
+  display: grid;
+  place-content: center;
+
+  background: var(--bg-back-2);
+  
+  border-block: var(--border-size) solid var(--border-color);
+}
+
+.display canvas {
+  aspect-ratio: 1 / 1;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.outputs {
+  flex-basis: 8ch;
+}
+
+.input, .output {
+  border: 0;
+  margin: 0;
+  z-index: 1; /* we want outlines above */
+}
+
+.input {
+  flex: 1;
+  resize: horizontal;
+  min-width: 100%;
+  
+  border-block-start: var(--border-size) solid var(--border-color);
+}
+
+.output {
+  width: 100%;
+  height: 100%;
+  resize: vertical;
+}
