@@ -175,3 +175,13 @@ body > * {
   height: 100%;
   resize: vertical;
 }
+
+@media (max-aspect-ratio: 2/3) {
+  body {
+    flex-direction: column;
+  }
+
+  .input {
+    resize: vertical; 
+  }
+}
