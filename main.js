@@ -82,7 +82,8 @@ Object.keys(state.projector.options)
 
 withInput('run', (el) => state.running = el.checked)
 
-// do not do this
+const $gridSize = $('#gridSize')
 withInput('laserCoordinates', (el) => {
   state.projector.options.laserCoordinates = el.selectedIndex
+  $gridSize.hidden = el.selectedIndex !== 0
 })
