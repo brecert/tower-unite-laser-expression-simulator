@@ -3,7 +3,9 @@ import { interpret } from './vm/src/index.js'
 
 const
   RectangularGrid = 0,
-  LinePoints = 1
+  LineShape = 1,
+  PlusShape = 2
+
 
 export class Projector {
     compiledData = null
@@ -41,9 +43,19 @@ export class Projector {
     points() {
       switch(this.options.laserCoordinates) {
         case RectangularGrid: return Array.from(this.rectangularGridPoints())
-        case LinePoints: return Array.from(this.linePoints())
+        case LineShape: return Array.from(this.linePoints())
+        case PlusShape: return Array.from(this.plusPoints())
         default: 
           throw new Error(`Invalid Laser Coordinates: ${this.options.laserCoordinates}`) 
+      }
+    }
+
+    *plusPoints() {
+      for (const x of interpolate(16, -100, 100)) {
+        yield { x, y: 0 }
+      }
+      for (const y of interpolate(16, -100, 100)) {
+        yield { x: 0, y }
       }
     }
 
