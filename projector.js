@@ -5,7 +5,8 @@ const
   RectangularGrid = 0,
   LineShape = 1,
   PlusShape = 2,
-  CircleShape = 3
+  CircleShape = 3,
+  SquareShape = 4
 
 
 export class Projector {
@@ -47,8 +48,38 @@ export class Projector {
       case LineShape: return Array.from(this.linePoints())
       case PlusShape: return Array.from(this.plusPoints())
       case CircleShape: return Array.from(this.circlePoints())
+      case SquareShape: return Array.from(this.squarePoints())
       default:
         throw new Error(`Invalid Laser Coordinates: ${this.options.laserCoordinates}`)
+    }
+  }
+
+  *squarePoints() {
+    const pointsForward = Array.from(interpolate(9, -100, 100))
+    const pointsBackward = Array.from(interpolate(9, 100, -100))
+
+    // console.log(pointsForward)
+    pointsForward.pop()
+    pointsBackward.pop()
+
+    // top (>)
+    for (const x of pointsForward) {
+      yield { x, y: 100 }
+    }
+
+    // right (v)
+    for (const y of pointsBackward) {
+      yield { x: 100, y }
+    }
+
+    // bottom (<)
+    for (const x of pointsBackward) {
+      yield { x, y: -100 }
+    }
+
+    // left (^)
+    for (const y of pointsForward) {
+      yield { x: -100, y }
     }
   }
 
