@@ -21,10 +21,10 @@ export const dayInSeconds = () => ((Date.now() % 86400000) / 1000)
  * @param {number} n the number of sides the n-gon has
  */
 export function* regularPolygonPoints(n) {
-    const tau = Math.PI * 2
+    const rad = (360 / n) * ( Math.PI / 180 );
     for (let i = 0; i < n; i++) {
-        const x = Math.sin(tau * (i / n))
-        const y = Math.cos(tau * (i / n))
+        const x = Math.sin(rad * i)
+        const y = Math.cos(rad * i)
         yield { x, y }
     }
 }
