@@ -22,7 +22,7 @@ export const dayInSeconds = () => ((Date.now() % 86400000) / 1000)
  */
 export function* regularPolygonPoints(n) {
     const tau = Math.PI * 2
-    for(let i = 0; i < n; i++) {
+    for (let i = 0; i < n; i++) {
         const x = Math.sin(tau * (i / n))
         const y = Math.cos(tau * (i / n))
         yield { x, y }

@@ -1,7 +1,7 @@
 import { lang, empty } from 'https://unpkg.com/parser-lang@0.4.0/main.mjs?module';
 
 const infixAst = ([l, r]) => {
-  if(r.length === 0) {
+  if (r.length === 0) {
     return l
   } else {
     const x = r.reduce((acc, curr) => {
@@ -11,7 +11,7 @@ const infixAst = ([l, r]) => {
     return x
   }
 }
-const prefixAst = ([op ,, r]) => ['prefix', op, r]
+const prefixAst = ([op, , r]) => ['prefix', op, r]
 
 // while we can assign to any expr, only ident seems to do anything so we'll just do checks to simplify error checking and parsing
 export const parser = lang`
@@ -32,7 +32,7 @@ export const parser = lang`
 
 
   Assign
-    = variable o '=' o Expression > ${([l ,, op ,, r]) => ['assign', ...l, r]}
+    = variable o '=' o Expression > ${([l, , op, , r]) => ['assign', ...l, r]}
     ;
     
   InfixOpAll
@@ -85,7 +85,7 @@ export const parser = lang`
 // todo: identifier's can hold unicode characters / emojis, it may be a blacklist rather than a whitelist
 
 export const parse = (input) =>
-    parser.Root.tryParse(input.replaceAll(/#.+/g, ''))
+  parser.Root.tryParse(input.replaceAll(/#.+/g, ''))
 
 
 

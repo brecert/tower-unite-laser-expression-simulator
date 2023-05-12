@@ -18,7 +18,7 @@ export class BytecodeCompiler {
 
     compile(ast) {
         // todo: add [lit, val]
-        if(typeof ast === 'number') return [instructions.id.Lit, ast]
+        if (typeof ast === 'number') return [instructions.id.Lit, ast]
 
         switch (ast[0]) {
             case "root": {
@@ -48,7 +48,7 @@ export class BytecodeCompiler {
                 // we do bytecode here before knownvars so we don't accidently refer to an invalid variable
                 let bytecode = this.compile(expr)
 
-                if(assignType == instructions.id.SetVar && !this.knownVars.has(name))
+                if (assignType == instructions.id.SetVar && !this.knownVars.has(name))
                     this.knownVars.set(name, this.knownVars.size)
 
                 // todo: optimize variables names to keep track of stacksize and pull from that as needed

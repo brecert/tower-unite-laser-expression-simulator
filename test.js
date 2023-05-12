@@ -20,22 +20,22 @@ const printBytecode = (instructions) => {
 
     const next = () => instructions[++i]
 
-    for(i; i < instructions.length; i++) {
+    for (i; i < instructions.length; i++) {
         const opcode = instructions[i]
 
         const name = instructionNames[opcode]
-        
-        if(opcode >= Instruction.Add && opcode <= Instruction.Or) {
+
+        if (opcode >= Instruction.Add && opcode <= Instruction.Or) {
             // (${infixNames[opcode]})
             console.log(`${name}`)
             continue
         }
-        if(opcode == Instruction.Not || opcode == Instruction.Neg) {
+        if (opcode == Instruction.Not || opcode == Instruction.Neg) {
             // (${prefixNames[opcode]})
             console.log(`${name}`)
             continue
         }
-        switch(opcode) {
+        switch (opcode) {
             case Instruction.GetVar: {
                 console.log(`Get #${next()}`)
                 continue
