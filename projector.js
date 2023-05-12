@@ -1,5 +1,9 @@
-import { dayInSeconds, hsv2hsl, interpolate } from "./utils.js";
+import { dayInSeconds, hsv2hsl, interpolate, regularPolygonPoints } from "./utils.js";
 import { interpret } from './vm/src/index.js'
+
+const
+  RectangularGrid = 0,
+  LinePoints = 1
 
 export class Projector {
     compiledData = null
@@ -11,7 +15,8 @@ export class Projector {
       sizeY: 20,
       scaleX: 1,
       scaleY: 1,
-      rotation: 0
+      rotation: 0,
+      laserCoordinates: RectangularGrid
     }
   
     constructor(canvas) {
@@ -29,16 +34,45 @@ export class Projector {
       }
     }
   
+    render() {
+      this.renderPoints(this.points())
+    }
+
+    points() {
+      switch(this.options.laserCoordinates) {
+        case RectangularGrid: return Array.from(this.rectangularGridPoints())
+        case LinePoints: return Array.from(this.linePoints())
+        default: 
+          throw new Error(`Invalid Laser Coordinates: ${this.options.laserCoordinates}`) 
+      }
+    }
+
+    *linePoints() {
+      for(const x of interpolate(32, -100, 100)) {
+        yield { x, y: 100 }
+      }
+    }
+
+    *rectangularGridPoints() {
+      const cols = Array.from(interpolate(this.options.sizeX, -100, 100))
+      const rows = Array.from(interpolate(this.options.sizeY, 100, -100))
+
+      for (const y of rows) {
+        for (const x of cols) {
+          yield { x, y }
+        }
+      }
+    }
+
     // todo: there will be bugs with the day changing but not this
     // maybe that's accurate though?
     projectionStartTime = dayInSeconds()
-    renderRectangularGrid() {
-      const cols = Array.from(interpolate(this.options.sizeX, -100, 100))
-      const rows = Array.from(interpolate(this.options.sizeY, 100, -100))
-      const count = this.options.sizeX * this.options.sizeY
+    renderPoints(points) {
+      const count = points.length - 1
       const time = dayInSeconds()
-  
+
       this.ctx.save()
+      
       if(this.options.rotation !== 0 && this.options.rotation !== 1) {
         const halfWidth = this.canvas.width / 2
         const halfHeight = this.canvas.height / 2
@@ -46,20 +80,18 @@ export class Projector {
         this.ctx.rotate(this.options.rotation*Math.PI*2)
         this.ctx.translate(-halfWidth, -halfHeight)
       }
-      let index = 0;
-      for (const rowPos of rows) {
-        for (const colPos of cols) {
-          const outputs = interpret(this.bytecode, {
-            x: colPos,
-            y: rowPos,
-            index: index++,
-            count: count - 1,
-            time: time,
-            projectionStartTime: this.projectionStartTime,
-          });
-          this.renderPoint(outputs)
-        }
-      }
+
+      points.forEach(({ x, y }, index) => {
+        const outputs = interpret(this.bytecode, {
+          x, y,
+          index,
+          count,
+          time,
+          projectionStartTime: this.projectionStartTime,
+        });
+        this.renderPoint(outputs)
+      })
+      
       this.ctx.restore()
     }
   

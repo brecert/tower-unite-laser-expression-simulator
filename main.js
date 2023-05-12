@@ -68,7 +68,7 @@ class State {
       this.projector.ctx.clearRect(0, 0, this.projector.canvas.width, this.projector.canvas.height)
       
       this.handleError(() => {
-        this.projector.renderRectangularGrid();
+        this.projector.render();
       })
     }
     if(this.#running) requestAnimationFrame(() => this.runCycle())
@@ -81,3 +81,6 @@ Object.keys(state.projector.options)
   .map(name => withInput(name, el => state.projector.options[name] = el.valueAsNumber))
 
 withInput('run', (el) => state.running = el.checked)
+
+// do not do this
+withInput('laserCoordinates', (el) => state.projector.options.laserCoordinates = el.selectedIndex)

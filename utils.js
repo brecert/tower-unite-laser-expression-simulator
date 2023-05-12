@@ -15,3 +15,16 @@ export function* interpolate(count, start, total) {
 
 // the current time in seconds since the beginning of the day
 export const dayInSeconds = () => ((Date.now() % 86400000) / 1000)
+
+/**
+ * Generate points of a regular n-gon.
+ * @param {number} n the number of sides the n-gon has
+ */
+export function* regularPolygonPoints(n) {
+    const tau = Math.PI * 2
+    for(let i = 0; i < n; i++) {
+        const x = Math.sin(tau * (i / n))
+        const y = Math.cos(tau * (i / n))
+        yield { x, y }
+    }
+}
