@@ -1,0 +1,8 @@
+#wave parameters:
+ phase     = tau*time;  #wave movement (1 cycle per second)
+ frequency = 0.05;      #wave width
+ amp       = 10;        #wave height
+
+#output:
+ x' = x;
+ y' = y + amp * sin( frequency*x + phase );

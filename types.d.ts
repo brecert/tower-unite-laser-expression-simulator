@@ -1,9 +1,9 @@
 export type Expression =
     | null
     | number
-    | ['var', name: string]
-    | ['infix', op: string, lhs: Expression, rhs: Expression]
-    | ['prefix', op: string, rhs: Expression]
-    | ['assign', 'var', name: string, expr: Expression]
-    | ['call', name: string, args: Expression[]]
+    | [inst:'var', name: string]
+    | [inst:'infix', op: string, lhs: Expression, rhs: Expression]
+    | [inst:'prefix', op: string, rhs: Expression]
+    | [inst:'assign', type:'var', name: string, expr: Expression]
+    | [inst:'call', name: string, args: Expression[]]
     | ['root', Expression[]]

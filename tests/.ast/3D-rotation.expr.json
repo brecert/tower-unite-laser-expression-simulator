@@ -1,0 +1,156 @@
+{
+  "exprs": [
+    "root",
+    [
+      ["assign", "var", "z", 0],
+      ["assign", "var", "rx", ["var", "time"]],
+      ["assign", "var", "ry", ["infix", "/", ["var", "time"], 2]],
+      ["assign", "var", "rz", ["infix", "/", ["var", "time"], 4]],
+      ["assign", "var", "cx", ["call", "cos", [["var", "rx"]]]],
+      ["assign", "var", "sx", ["call", "sin", [["var", "rx"]]]],
+      ["assign", "var", "cy", ["call", "cos", [["var", "ry"]]]],
+      ["assign", "var", "sy", ["call", "sin", [["var", "ry"]]]],
+      ["assign", "var", "cz", ["call", "cos", [["var", "rz"]]]],
+      ["assign", "var", "sz", ["call", "sin", [["var", "rz"]]]],
+      [
+        "assign",
+        "var",
+        "x'",
+        [
+          "infix",
+          "+",
+          [
+            "infix",
+            "+",
+            [
+              "infix",
+              "*",
+              ["var", "x"],
+              ["infix", "*", ["var", "cz"], ["var", "cy"]]
+            ],
+            [
+              "infix",
+              "*",
+              ["var", "y"],
+              ["infix", "*", ["var", "cy"], ["prefix", "-", ["var", "sz"]]]
+            ]
+          ],
+          ["infix", "*", ["var", "z"], ["var", "sy"]]
+        ]
+      ],
+      [
+        "assign",
+        "var",
+        "y'",
+        [
+          "infix",
+          "+",
+          [
+            "infix",
+            "+",
+            [
+              "infix",
+              "*",
+              ["var", "x"],
+              [
+                "infix",
+                "+",
+                [
+                  "infix",
+                  "*",
+                  [
+                    "infix",
+                    "*",
+                    ["prefix", "-", ["var", "sx"]],
+                    ["prefix", "-", ["var", "sy"]]
+                  ],
+                  ["var", "cz"]
+                ],
+                ["infix", "*", ["var", "sz"], ["var", "cx"]]
+              ]
+            ],
+            [
+              "infix",
+              "*",
+              ["var", "y"],
+              [
+                "infix",
+                "+",
+                [
+                  "infix",
+                  "*",
+                  [
+                    "infix",
+                    "*",
+                    ["prefix", "-", ["var", "sx"]],
+                    ["prefix", "-", ["var", "sy"]]
+                  ],
+                  ["prefix", "-", ["var", "sz"]]
+                ],
+                ["infix", "*", ["var", "cx"], ["var", "cz"]]
+              ]
+            ]
+          ],
+          [
+            "infix",
+            "*",
+            ["infix", "*", ["var", "z"], ["prefix", "-", ["var", "sx"]]],
+            ["var", "cy"]
+          ]
+        ]
+      ],
+      [
+        "assign",
+        "var",
+        "z'",
+        [
+          "infix",
+          "+",
+          [
+            "infix",
+            "+",
+            [
+              "infix",
+              "*",
+              ["var", "x"],
+              [
+                "infix",
+                "+",
+                [
+                  "infix",
+                  "*",
+                  ["infix", "*", ["var", "cz"], ["var", "cx"]],
+                  ["prefix", "-", ["var", "sy"]]
+                ],
+                ["infix", "*", ["var", "sz"], ["var", "sx"]]
+              ]
+            ],
+            [
+              "infix",
+              "*",
+              ["var", "y"],
+              [
+                "infix",
+                "+",
+                [
+                  "infix",
+                  "*",
+                  ["infix", "*", ["prefix", "-", ["var", "sz"]], ["var", "cx"]],
+                  ["prefix", "-", ["var", "sy"]]
+                ],
+                ["infix", "*", ["var", "cz"], ["var", "sx"]]
+              ]
+            ]
+          ],
+          [
+            "infix",
+            "*",
+            ["infix", "*", ["var", "z"], ["var", "cx"]],
+            ["var", "cy"]
+          ]
+        ]
+      ]
+    ]
+  ],
+  "errors": []
+}

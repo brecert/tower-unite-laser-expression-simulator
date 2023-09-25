@@ -72,7 +72,7 @@ class ParsingError extends Error {
   offset = 0
 
   /**
-   * @param {{ line: number, column: number, offset: number }}
+   * @param {{ line: number, column: number, offset: number }} context
    * @param {string} message 
    */
   constructor({ line, column, offset }, message) {
@@ -139,11 +139,11 @@ function prefixBP(tok) {
 /**
  * @param {Tokenizer} t 
  * @param {number} mbp 
- * @returns {import("./types").Expression}
+ * @returns {import("./types.d.ts").Expression}
  */
 export function parseBPExpr(t, mbp) {
   let tok = t.next()
-  /** @type {import("./types").Expression} */
+  /** @type {import("./types.d.ts").Expression} */
   let lhs = null
   let pbp
 
@@ -236,11 +236,11 @@ export function parseBPExpr(t, mbp) {
 
 /** 
  * @param {string} text
- * @returns {{ exprs: ['root', import('./types').Expression[]], errors:(Error|ParsingError)[] }}
+ * @returns {{ exprs: ['root', import('./types.d.ts').Expression[]], errors:(Error|ParsingError)[] }}
 */
 export function parseProgram(text) {
   let t = Tokenizer.fromString(text)
-  /** @type {import('./types').Expression[]} */
+  /** @type {import('./types.d.ts').Expression[]} */
   let exprs = []
   let errors = []
   while (true) {

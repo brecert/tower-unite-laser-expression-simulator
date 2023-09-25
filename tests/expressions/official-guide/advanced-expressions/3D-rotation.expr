@@ -1,0 +1,22 @@
+#projector doesn't have a z value, make one up or set to 0
+ z = 0;
+
+#rotation around each axis:
+ rx = time;
+ ry = time/2;
+ rz = time/4;
+
+#cosine and sine values for each rotation axis:
+ cx = cos(rx);
+ sx = sin(rx);
+
+ cy = cos(ry);
+ sy = sin(ry);
+
+ cz = cos(rz);
+ sz = sin(rz);
+
+#result vector:
+ x' = x*(cz*cy) + y*(cy*-sz) + z*sy;
+ y' = x*(-sx*-sy*cz+sz*cx) + y*(-sx*-sy*-sz+cx*cz) + z*-sx*cy;
+ z' = x*(cz*cx*-sy+sz*sx) + y*(-sz*cx*-sy+cz*sx) + z*cx*cy;

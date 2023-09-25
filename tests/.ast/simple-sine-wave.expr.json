@@ -1,0 +1,44 @@
+{
+  "exprs": [
+    "root",
+    [
+      [
+        "assign",
+        "var",
+        "phase",
+        ["infix", "*", ["var", "tau"], ["var", "time"]]
+      ],
+      ["assign", "var", "frequency", 0.05],
+      ["assign", "var", "amp", 10],
+      ["assign", "var", "x'", ["var", "x"]],
+      [
+        "assign",
+        "var",
+        "y'",
+        [
+          "infix",
+          "+",
+          ["var", "y"],
+          [
+            "infix",
+            "*",
+            ["var", "amp"],
+            [
+              "call",
+              "sin",
+              [
+                [
+                  "infix",
+                  "+",
+                  ["infix", "*", ["var", "frequency"], ["var", "x"]],
+                  ["var", "phase"]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  ],
+  "errors": []
+}

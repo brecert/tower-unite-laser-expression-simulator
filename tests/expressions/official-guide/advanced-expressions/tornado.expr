@@ -1,0 +1,25 @@
+ size = 500;
+
+# Plot the tornado points in 3d
+ sidx = index * 0.15;
+ spin = sidx + (time / (sidx ^ 1.2)) * 50;
+ heightRand = (sidx ^ 0.6) * 10 -sin(sidx * 10000) * 8;
+
+ xp = cos(spin) * sidx;
+ yp = heightRand;
+ zp = sin(spin) * sidx + 500;
+
+ xp = xp + sin(sidx/10 + time) * 10;
+ zp = zp + cos(sidx/10 + time) * 10;
+
+
+ x' = xp;
+ y' = yp + 100;
+
+ z = zp;
+ x' = x' * size / z;
+ y' = y' * size / z - 145;
+
+ h = -time*100 + fraction*350;
+ v = 2.5 - z/300;
+ s = v;
