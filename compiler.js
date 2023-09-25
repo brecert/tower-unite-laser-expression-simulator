@@ -103,7 +103,7 @@ export class BytecodeCompiler {
                 return [getType, getName]
             }
             default: {
-                throw new Error(`Invalid Instruction: [${ast}]`)
+                throw new Error(`Invalid Instruction: [${JSON.stringify(ast)}]`)
             }
         }
     }

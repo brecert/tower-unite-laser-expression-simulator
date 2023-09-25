@@ -34,6 +34,7 @@ class State {
 
   set runtimeError(error) {
     if (error != null) {
+      console.error(error)
       $logs.value = error.toString()
     } else {
       $logs.value = ""

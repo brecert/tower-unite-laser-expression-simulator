@@ -1,4 +1,4 @@
-import { parse } from './parser.js'
+import { parseProgram } from './parser.js'
 import { BytecodeCompiler } from "./compiler.js";
 import { id as Input } from './constants/inputs.js';
 import { id as Instruction, infix as Infix, prefix as Prefix } from './constants/instructions.js';
@@ -80,18 +80,60 @@ const printBytecode = (instructions) => {
 }
 
 const input = `
-var = 4;
-var = 1;
-var = 2;
+size = 500;
 
-x' = x;
-y' = y;
+# Plot the tornado points in 3d
+sidx = index * 0.15;
+spin = sidx + (time / (sidx ^ 1.2)) * 50;
+heightRand = (sidx ^ 0.6) * 10 -sin(sidx * 10000) * 8;
 
-h = var * 100;
-s = 0.9;
+xp = cos(spin) * sidx;
+yp = heightRand;
+zp = sin(spin) * sidx + 500;
+
+xp = xp + sin(sidx/10 + time) * 10;
+zp = zp + cos(sidx/10 + time) * 10;
+
+
+x' = xp;
+y' = yp + 100;
+
+z = zp;
+x' = x' * size / z;
+y' = y' * size / z - 145;
+
+h = -time*100 + fraction*350;
+v = 2.5 - z/300;
+s = v;
 `
-const ast = parse(input)
-const bytecode = BytecodeCompiler.compile(ast)
+
+// const t = Tokenizer.fromString(input)
+const ast = parseProgram(input)
+for (let error of ast.errors) {
+    console.error(error)
+}
+if (ast.errors.length > 0) {
+    throw new Error(ast.errors)
+}
+
+console.log(ast)
+
+// const ast = parse(input)
+// console.log(ast)
+
+// const input = `
+// var = 4;
+// var = 1;
+// var = 2;
+
+// x' = x;
+// y' = y;
+
+// h = var * 100;
+// s = 0.9;
+// `
+// const ast = parse(input)
+const bytecode = BytecodeCompiler.compile(ast.exprs)
 printBytecode(bytecode)
 // console.log(bytecode)
 // const inputs = { x: 0, y: 0, index: 1, count: 1, time: Date.now() / 1000, projectionTime: 0, projectionStartTime: 0 }
