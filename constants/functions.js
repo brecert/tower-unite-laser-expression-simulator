@@ -14,9 +14,10 @@ export const id = {
     ceil   : 11,
     round  : 12,
     abs    : 13,
-    if     : 14,
-    lerp   : 15,
-    dbg    : 16
+    rand   : 14,
+    if     : 15,
+    lerp   : 16,
+    dbg    : 17
 }
 
 export const arity = {
@@ -34,7 +35,8 @@ export const arity = {
     [id.ceil]   : 1,
     [id.round]  : 1,
     [id.abs]    : 1,
-    [id.if]    : 3,
+    [id.rand]   : 0,
+    [id.if]     : 3,
     [id.lerp]   : 3,
     [id.dbg]    : 1
 }

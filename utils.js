@@ -5,7 +5,12 @@ export function hsv2hsl(hsv) {
     return { h, s, l }
 }
 
-// evenly space interpolations between start and total
+/**
+ * evenly space interpolations between start and total
+ * @param {number} count the amount of points
+ * @param {number} start from this value
+ * @param {number} total to this value
+ */
 export function* interpolate(count, start, total) {
     let spacing = (total - start) / (count - 1)
     for (let i = 0; i < count; i++) {
@@ -15,16 +20,3 @@ export function* interpolate(count, start, total) {
 
 // the current time in seconds since the beginning of the day
 export const dayInSeconds = () => ((Date.now() % 86400000) / 1000)
-
-/**
- * Generate points of a regular n-gon.
- * @param {number} n the number of sides the n-gon has
- */
-export function* regularPolygonPoints(n, r) {
-    const rad = (360 / n) * (Math.PI / 180);
-    for (let i = 0; i < n; i++) {
-        const x = r * Math.sin(rad * i)
-        const y = r * Math.cos(rad * i)
-        yield { x, y }
-    }
-}

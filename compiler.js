@@ -1,3 +1,5 @@
+// @ts-check
+
 import * as fns from './constants/functions.js'
 import * as instructions from './constants/instructions.js'
 import * as inputs from './constants/inputs.js'
@@ -16,8 +18,10 @@ export class BytecodeCompiler {
         return compiler.compile(ast)
     }
 
+    /** @param {import('./types.d.ts').Expression} ast  */
     compile(ast) {
         // todo: add [lit, val]
+        if (ast == null) throw new Error("TODO: Unexpected null")
         if (typeof ast === 'number') return [instructions.id.Lit, ast]
 
         switch (ast[0]) {
@@ -71,7 +75,6 @@ export class BytecodeCompiler {
                 const [, op, left, right] = ast
 
                 if (!(op in instructions.infix)) throw new Error(`Invalid InfixOp: ${op}`)
-
 
                 return [this.compile(left), this.compile(right), instructions.infix[op]]
             }

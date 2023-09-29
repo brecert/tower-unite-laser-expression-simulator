@@ -5,6 +5,7 @@ import { id as Instruction, infix as Infix, prefix as Prefix } from './constants
 import { interpret } from './vm/src/index.js';
 import { id as Output } from './constants/outputs.js';
 import { id as Function, arity as Arity } from './constants/functions.js';
+import { GLSLCompiler } from './glsl_compiler.js';
 
 const flipObject = (obj) =>
     Object.fromEntries(Object.entries(obj).map(([a, b]) => [b, a]))
@@ -83,28 +84,28 @@ const input = `
 size = 500;
 
 # Plot the tornado points in 3d
-sidx = index * 0.15;
-spin = sidx + (time / (sidx ^ 1.2)) * 50;
-heightRand = (sidx ^ 0.6) * 10 -sin(sidx * 10000) * 8;
+ sidx = index * 0.15;
+ spin = sidx + (time / (sidx ^ 1.2)) * 50;
+ heightRand = (sidx ^ 0.6) * 10 -sin(sidx * 10000) * 8;
 
-xp = cos(spin) * sidx;
-yp = heightRand;
-zp = sin(spin) * sidx + 500;
+ xp = cos(spin) * sidx;
+ yp = heightRand;
+ zp = sin(spin) * sidx + 500;
 
-xp = xp + sin(sidx/10 + time) * 10;
-zp = zp + cos(sidx/10 + time) * 10;
+ xp = xp + sin(sidx/10 + time) * 10;
+ zp = zp + cos(sidx/10 + time) * 10;
 
 
-x' = xp;
-y' = yp + 100;
+ x' = xp;
+ y' = yp + 100;
 
-z = zp;
-x' = x' * size / z;
-y' = y' * size / z - 145;
+ z = zp;
+ x' = x' * size / z;
+ y' = y' * size / z - 145;
 
-h = -time*100 + fraction*350;
-v = 2.5 - z/300;
-s = v;
+ h = -time*100 + fraction*350;
+ v = 2.5 - z/300;
+ s = v;
 `
 
 // const t = Tokenizer.fromString(input)
@@ -117,6 +118,9 @@ if (ast.errors.length > 0) {
 }
 
 console.log(ast)
+
+const glsl = GLSLCompiler.compile(ast.exprs)
+console.log(glsl)
 
 // const ast = parse(input)
 // console.log(ast)
@@ -133,8 +137,8 @@ console.log(ast)
 // s = 0.9;
 // `
 // const ast = parse(input)
-const bytecode = BytecodeCompiler.compile(ast.exprs)
-printBytecode(bytecode)
+// const bytecode = BytecodeCompiler.compile(ast.exprs)
+// printBytecode(bytecode)
 // console.log(bytecode)
 // const inputs = { x: 0, y: 0, index: 1, count: 1, time: Date.now() / 1000, projectionTime: 0, projectionStartTime: 0 }
 // const output = interpret(bytecode, inputs)

@@ -131,8 +131,8 @@ function infixBP(tok) {
 function prefixBP(tok) {
   // TODO: FIX ME
   switch (tok) {
-    case '-': return 100
-    case '!': return 100
+    case '-': return 12
+    case '!': return 0
   }
 }
 
@@ -158,7 +158,9 @@ export function parseBPExpr(t, mbp) {
       t.next()
 
       tok = t.peek()
+
       if (tok?.[TOKEN_SYM] === ')') {
+        t.next()
         lhs = ['call', name, []]
       } else {
         let args = []
