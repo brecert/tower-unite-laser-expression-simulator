@@ -40,25 +40,3 @@ export const arity = {
     [id.lerp]   : 3,
     [id.dbg]    : 1
 }
-
-export const table = {
-    [id.sin]: Math.sin,
-    [id.cos]: Math.cos,
-    [id.tan]: Math.tan,
-    [id.asin]: Math.asin,
-    [id.acos]: Math.acos,
-    [id.atan]: Math.atan,
-    [id.atan2]: Math.atan2,
-    [id.sqrt]: Math.sqrt,
-    [id.min]: Math.min,
-    [id.max]: Math.max,
-    [id.floor]: Math.floor,
-    [id.ceil]: Math.ceil,
-    [id.round]: Math.round,
-    [id.abs]: Math.abs,
-    [id.rand]: Math.random,
-    [id.if]: (float, a, b) => float >= 1 ? a : b,
-    [id.lerp]: (frac, a, b) => (a * frac + b * (1 - frac)),
-    // debug
-    [id.dbg]: (n) => { console.log(n); return n }
-  }

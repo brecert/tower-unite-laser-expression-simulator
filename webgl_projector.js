@@ -78,7 +78,7 @@ export class WebGLProjector {
 
     updateProgram({ vertex, fragment }) {
         this.#programDraw = twgl.createProgramInfo(this.gl, [vertex, fragment]);
-        if(this.#programDraw == null) {
+        if (this.#programDraw == null) {
             throw new Error(`Error Compiling Shaders`)
         }
         this.#projectionStartTime = dayInSeconds()

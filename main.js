@@ -1,6 +1,4 @@
-import { parse } from './parser.js'
-import { RectangularGrid, WebGLProjector } from './gl_projector.js'
-import { GLSLCompiler } from './glsl_compiler.js'
+import { WebGLProjector } from './webgl_projector.js'
 
 const $ = (query) => document.querySelector(query)
 
@@ -69,7 +67,7 @@ class State {
   updateShape(type, cols, rows) {
     this.projector.useShape($laserCoordinates.selectedIndex, $sizeX.valueAsNumber, $sizeY.valueAsNumber)
     $gridSize.hidden = $laserCoordinates.selectedIndex !== 0
-  
+
   }
 
   runCycle() {
