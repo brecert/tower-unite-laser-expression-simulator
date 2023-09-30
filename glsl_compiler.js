@@ -32,11 +32,6 @@ const VERTEX_SHADER = `
     float iif(float cond, float a, float b) {
         return mix(b, a, step(1.0, cond));
     }
-
-    float atan2(float y, float x) {
-        bool s = abs(x) > abs(y);
-        return mix(pi/2.0 - atan(x,y), atan(y,x), float(s));
-    }
     
     float rand() {
         return random;
@@ -205,8 +200,12 @@ export class GLSLCompiler {
                 if (args.length !== fns.arity[id])
                     throw new Error(`Invalid amount of arguments: ${name} expected ${fns.arity[name]} arguments, not ${args.length}`)
 
-                if (id == fns.id.if) {
+                if (id === fns.id.if) {
                     name = "iif";
+                }
+
+                if (id === fns.id.atan2) {
+                    name = "atan";
                 }
 
                 return `${name}(${args.flatMap(arg => this.compileRaw(arg)).join(', ')})`
