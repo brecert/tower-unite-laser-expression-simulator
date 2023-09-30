@@ -6,12 +6,14 @@ import * as inputs from './constants/inputs.js'
 import * as outputs from './constants/outputs.js'
 
 const VERTEX_SHADER = `
+    #version 300 es
     precision mediump float;
 
     const float pi = 3.14159;
     const float tau = 6.28318;
 
-    attribute vec3 v_coord_index;
+    in vec3 v_coord_index;
+    
     uniform sampler2D u_texture;
     uniform float time;
     uniform float count;
@@ -19,9 +21,9 @@ const VERTEX_SHADER = `
     uniform float random;
     uniform vec3 u_transform;
 
-    varying float h;
-    varying float s;
-    varying float v;
+    out float h;
+    out float s;
+    out float v;
 
     float lerp(float frac, float a, float b) {
         return mix(a, b, frac);
@@ -34,10 +36,6 @@ const VERTEX_SHADER = `
     float atan2(float y, float x) {
         bool s = abs(x) > abs(y);
         return mix(pi/2.0 - atan(x,y), atan(y,x), float(s));
-    }
-
-    float round(float n) {
-        return floor(n) + step(-0.5, n - ceil(n));
     }
     
     float rand() {
@@ -84,11 +82,14 @@ const VERTEX_SHADER = `
 `.trim()
 
 const FRAGMENT_SHADER = `
+    #version 300 es
     precision mediump float;
     
-    varying float h;
-    varying float s;
-    varying float v;
+    in float h;
+    in float s;
+    in float v;
+    
+    out vec4 fragColor;
 
     vec3 hsv2rgb(vec3 c) {
         vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -97,14 +98,14 @@ const FRAGMENT_SHADER = `
     }
 
     void main () {
-        gl_FragColor = vec4(hsv2rgb(vec3(h, clamp(s, 0.0, 1.0), clamp(v, 0.0, 1.0))), v);
+        fragColor = vec4(hsv2rgb(vec3(h, clamp(s, 0.0, 1.0), clamp(v, 0.0, 1.0))), v);
     }
 `.trim()
 
 const isInput = (name) => name in inputs.id
 const isOutput = (name) => name in outputs.id
 const isFunction = (name) => name in fns.id
-const isBooleanOp = (name) => ["<", ">", "<=", ">=", "=="].includes(name)
+const isBooleanOp = (name) => ["<", ">", "<=", ">=", "==", "&", "|"].includes(name)
 
 const outputNames = {
     "x'": "x1",
@@ -211,7 +212,7 @@ export class GLSLCompiler {
                 return `${name}(${args.flatMap(arg => this.compileRaw(arg)).join(', ')})`
             }
             case "infix": {
-                const [, op, left, right] = ast
+                let [, op, left, right] = ast
 
                 if (!(op in instructions.infix)) throw new Error(`Invalid InfixOp: ${op}`)
 
@@ -226,6 +227,13 @@ export class GLSLCompiler {
                     return `mod(${lhs}, ${rhs})`
                 }
 
+                if (op == '&') {
+                    return `float(bool(${lhs}) && bool(${rhs}))`
+                }
+
+                if (op == '|') {
+                    return `float(bool(${lhs}) || bool(${rhs}))`
+                }
 
                 return `${isBooleanOp(op) ? 'float' : ''}(${lhs} ${op} ${rhs})`
             }

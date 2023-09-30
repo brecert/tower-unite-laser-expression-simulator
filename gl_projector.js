@@ -45,14 +45,11 @@ export class WebGLProjector {
      * @param {string} script 
      * @param {number} shape 
      */
-    constructor(canvas, script, shape) {
-        let gl = canvas.getContext('webgl', { depth: false, antialiasing: false, alpha: false });
+    constructor(canvas, script, shape = RectangularGrid, cols = 20, rows = 20) {
+        let gl = canvas.getContext('webgl2', { depth: false, antialiasing: false, alpha: false });
         this.gl = gl
         this.gl.enable(gl.BLEND);
         this.gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_COLOR);
-
-        this.useProgram(script)
-        this.useShape(shape, 20, 20)
     }
 
     /**
@@ -81,6 +78,9 @@ export class WebGLProjector {
 
     updateProgram({ vertex, fragment }) {
         this.#programDraw = twgl.createProgramInfo(this.gl, [vertex, fragment]);
+        if(this.#programDraw == null) {
+            throw new Error(`Error Compiling Shaders`)
+        }
         this.#projectionStartTime = dayInSeconds()
     }
 

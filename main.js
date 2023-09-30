@@ -12,17 +12,21 @@ const withInput = (id, cb) => {
   }
 }
 
-
 const $display = $('#projectorDisplay')
 const $input = $('#projectorInput')
 const $logs = $('#projectorLogs')
+
+const $laserCoordinates = $('#laserCoordinates')
+const $gridSize = $('#gridSize')
+const $sizeX = $('#sizeX')
+const $sizeY = $('#sizeY')
+
 
 // this is bad but I was curious how it'd work out
 class State {
   #running = true
   #runtimeError = null
-
-  projector = new WebGLProjector($display, $input.value, RectangularGrid)
+  projector
 
   set running(value) {
     let startRunning = this.#running === false && value === true
@@ -43,13 +47,15 @@ class State {
   }
 
   constructor() {
+    this.handleError(() => this.projector = new WebGLProjector($display, $input.value))
     $input.oninput = () => this.handleError(() => this.updateProgram())
     this.handleError(() => this.updateProgram())
+    this.handleError(() => this.updateShape())
     this.runCycle()
   }
 
   handleError(fn) {
-    try { fn() }
+    try { return fn() }
     catch (err) {
       this.runtimeError = err
     }
@@ -58,6 +64,12 @@ class State {
   updateProgram() {
     this.projector.useProgram($input.value)
     this.runtimeError = null
+  }
+
+  updateShape(type, cols, rows) {
+    this.projector.useShape($laserCoordinates.selectedIndex, $sizeX.valueAsNumber, $sizeY.valueAsNumber)
+    $gridSize.hidden = $laserCoordinates.selectedIndex !== 0
+  
   }
 
   runCycle() {
@@ -70,24 +82,11 @@ class State {
 
 const state = new State()
 
-// Object.keys(state.projector.options)
-//   .map(name => withInput(name, el => state.projector.options[name] = el.valueAsNumber))
-
 withInput('run', (el) => state.running = el.checked)
 
-const $laserCoordinates = $('#laserCoordinates')
-const $gridSize = $('#gridSize')
-const $sizeX = $('#sizeX')
-const $sizeY = $('#sizeY')
-const updateShape = () => {
-  state.projector.useShape($laserCoordinates.selectedIndex, $sizeX.valueAsNumber, $sizeY.valueAsNumber)
-  $gridSize.hidden = $laserCoordinates.selectedIndex !== 0
-
-}
-
-withInput('laserCoordinates', updateShape)
-withInput('sizeX', updateShape)
-withInput('sizeY', updateShape)
+withInput('laserCoordinates', () => state.updateShape())
+withInput('sizeX', () => state.updateShape())
+withInput('sizeY', () => state.updateShape())
 
 withInput('rotation', (el) => state.projector.rotation = el.valueAsNumber * 360)
 withInput('scaleX', (el) => state.projector.scaleX = el.valueAsNumber)
