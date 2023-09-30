@@ -137,6 +137,17 @@ function prefixBP(tok) {
 }
 
 /**
+ * 
+ * @param {Tokenizer} param0 
+ * @param {*} val 
+ * @returns {import("./types.d.ts").Expression}
+ */
+function withCtx({ line, column, offset }, val) {
+  if (val == null) return null
+  return { val, ctx: { line, column, offset } }
+}
+
+/**
  * @param {Tokenizer} t 
  * @param {number} mbp 
  * @returns {import("./types.d.ts").Expression}
@@ -152,7 +163,7 @@ export function parseBPExpr(t, mbp) {
   }
   else if (tok[TOKEN_IDENT] != null) {
     let name = tok[TOKEN_IDENT]
-    lhs = ['var', name]
+    lhs = withCtx(t, ['var', name])
     tok = t.peek()
     if (tok?.[TOKEN_SYM] === '(') {
       t.next()
@@ -161,7 +172,7 @@ export function parseBPExpr(t, mbp) {
 
       if (tok?.[TOKEN_SYM] === ')') {
         t.next()
-        lhs = ['call', name, []]
+        lhs = withCtx(t, ['call', name, []])
       } else {
         let args = []
         do {
@@ -179,17 +190,17 @@ export function parseBPExpr(t, mbp) {
           }
           else throw new ExpectedTokenError(t, `')' or ','`, tok)
         } while (tok)
-        lhs = ['call', name, args]
+        lhs = withCtx(t, ['call', name, args])
       }
     }
   }
   else if (tok[TOKEN_FLOAT] != null) {
-    lhs = parseFloat(tok[TOKEN_FLOAT])
+    lhs = withCtx(t, parseFloat(tok[TOKEN_FLOAT]))
     tok = t.peek()
     // it's a postfix and we could fit it in the pratt loop but we only want the postfix if it's a float for clarity
     if (tok?.[TOKEN_IDENT] != null) {
       t.next()
-      lhs = ['infix', '*', lhs, ['var', tok[TOKEN_IDENT]]]
+      lhs = withCtx(t, ['infix', '*', lhs, ['var', tok[TOKEN_IDENT]]])
     }
   }
   else if (tok[TOKEN_SYM] === '(') {
@@ -201,7 +212,7 @@ export function parseBPExpr(t, mbp) {
   }
   else if ((pbp = prefixBP(tok[0])) != null) {
     const rhs = parseBPExpr(t, pbp)
-    lhs = ['prefix', tok[0], rhs]
+    lhs = withCtx(t, ['prefix', tok[0], rhs])
   }
   else throw new ParsingError(t, `Unexpected Literal or Unsupported Prefix: ${formatToken(tok)}`)
 
@@ -225,7 +236,7 @@ export function parseBPExpr(t, mbp) {
       t.next()
 
       let rhs = parseBPExpr(t, rbp)
-      lhs = ['infix', op[0], lhs, rhs]
+      lhs = withCtx(t, ['infix', op[0], lhs, rhs])
       continue
     }
 
@@ -238,7 +249,7 @@ export function parseBPExpr(t, mbp) {
 
 /** 
  * @param {string} text
- * @returns {{ exprs: ['root', import('./types.d.ts').Expression[]], errors:(Error|ParsingError)[] }}
+ * @returns {{ exprs: import('./types.d.ts').Expression, errors:(Error|ParsingError)[] }}
 */
 export function parseProgram(text) {
   let t = Tokenizer.fromString(text)
@@ -263,13 +274,13 @@ export function parseProgram(text) {
       if (semi?.[TOKEN_SYM] !== ';') throw new ExpectedTokenError(t, `';'`, semi)
       else t.next()
 
-      exprs.push(['assign', 'var', name[TOKEN_IDENT], expr])
+      exprs.push(withCtx(t, ['assign', 'var', name[TOKEN_IDENT], expr]))
     } catch (error) {
       errors.push(error)
       t.gotoNextExpression()
     }
   }
-  return { exprs: ['root', exprs], errors }
+  return { exprs: withCtx(t, ['root', exprs]), errors }
 }
 
 /** 

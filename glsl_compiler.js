@@ -116,6 +116,27 @@ const fmtNumber = (num) => Number.isInteger(num)
     ? num.toFixed(1)
     : num.toString()
 
+class CompileError extends Error {
+    line = 0
+    column = 0
+    offset = 0
+
+    /**
+     * @param {{ line: number, column: number, offset: number }} context
+     * @param {string} message 
+     */
+    constructor({ line, column, offset }, message) {
+        super(message)
+        this.line = line
+        this.column = column
+        this.offset = offset
+    }
+
+    toString() {
+        return `[${this.line}:${this.column}] ${this.message}`
+    }
+}
+
 // not a true bytecode but close enough for out needs
 export class GLSLCompiler {
     /** @type {Map<string, number>} */
@@ -158,12 +179,13 @@ export class GLSLCompiler {
 
     /**
      * 
-     * @param {import('./types.d.ts').Expression} ast 
+     * @param {import('./types.d.ts').Expression} astCtx
      * @returns {string} the expression compiled to GLSL code without any surrounding code
      */
-    compileRaw(ast) {
+    compileRaw(astCtx) {
         // todo: add [lit, val]
-        if (ast == null) throw new Error("TODO: Unexpected null")
+        if (astCtx == null) throw new Error("TODO: Unexpected null")
+        const { val: ast, ctx } = astCtx
         if (typeof ast === 'number') return fmtNumber(ast)
 
         switch (ast[0]) {
@@ -173,8 +195,8 @@ export class GLSLCompiler {
             case "assign": {
                 const [, type, name, expr] = ast
 
-                if (type !== 'var') throw new Error(`Invalid Assignment Type: ${type}`)
-                if (isInput(name)) throw new Error(`Invalid Assignment, cannot assign to input variable: ${name}`)
+                if (type !== 'var') throw new CompileError(ctx, `Invalid Assignment Type: ${type}`)
+                if (isInput(name)) throw new CompileError(ctx, `Invalid Assignment, cannot assign to input variable: ${name}`)
 
                 const assignName = isOutput(name)
                     ? getOutputName(name)
@@ -196,12 +218,12 @@ export class GLSLCompiler {
                 let [, name, args] = ast
 
                 if (!isFunction(name))
-                    throw new Error(`Function not found: ${name}`)
+                    throw new CompileError(ctx, `Function not found: ${name}`)
 
                 const id = fns.id[name]
 
                 if (args.length !== fns.arity[id])
-                    throw new Error(`Invalid amount of arguments: ${name} expected ${fns.arity[name]} arguments, not ${args.length}`)
+                    throw new CompileError(ctx, `Invalid amount of arguments: ${name} expected ${fns.arity[name]} arguments, not ${args.length}`)
 
                 if (id === fns.id.if) {
                     name = "iif";
@@ -216,7 +238,7 @@ export class GLSLCompiler {
             case "infix": {
                 let [, op, left, right] = ast
 
-                if (!(op in instructions.infix)) throw new Error(`Invalid InfixOp: ${op}`)
+                if (!(op in instructions.infix)) throw new CompileError(ctx, `Invalid infix operator: ${op}`)
 
                 const lhs = this.compileRaw(left)
                 const rhs = this.compileRaw(right)
@@ -242,7 +264,7 @@ export class GLSLCompiler {
             case "prefix": {
                 const [, op, right] = ast
 
-                if (!(op in instructions.prefix)) throw new Error(`Invalid PrefixOp: ${op}`)
+                if (!(op in instructions.prefix)) throw new CompileError(ctx, `Invalid prefix operator: ${op}`)
 
                 return `(${op}${this.compileRaw(right)})`
             }
@@ -250,7 +272,7 @@ export class GLSLCompiler {
                 const [, name] = ast
 
                 if (!isInput(name) && !isOutput(name) && !this.knownVars.has(name))
-                    throw new Error(`Variable Not Found: ${name}`)
+                    throw new CompileError(ctx, `Variable Not Found: ${name}`)
 
                 let getName = this.getVarName(name)
 
@@ -261,8 +283,8 @@ export class GLSLCompiler {
                     }
                 }
                 else if (isOutput(name)) {
-                    if(!this.seenOutputs.has(name)) {
-                        throw new Error(`Outputs must be assigned to first before being used to avoid bugs`)
+                    if (!this.seenOutputs.has(name)) {
+                        throw new CompileError(ctx, `Outputs must be assigned to first before being used to avoid bugs`)
                     }
                     getName = getOutputName(name)
                 }
@@ -270,7 +292,7 @@ export class GLSLCompiler {
                 return getName
             }
             default: {
-                throw new Error(`Invalid Instruction: [${JSON.stringify(ast)}]`)
+                throw new CompileError(ctx, `Invalid Instruction: [${JSON.stringify(ast)}]`)
             }
         }
     }
