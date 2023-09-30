@@ -75,11 +75,9 @@ export function* genRectangularGridPoints(colSize, rowSize) {
 
 /** @param {Generator<{x:number, y:number}>} generator  */
 export function* genPointData(generator) {
-    let i = 0
     for (let { x, y } of generator) {
         yield x
         yield y
-        yield i++
     }
 }
 

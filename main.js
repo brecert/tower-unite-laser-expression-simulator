@@ -64,17 +64,16 @@ class State {
     this.runtimeError = null
   }
 
-  updateShape(type, cols, rows) {
+  updateShape() {
     this.projector.useShape($laserCoordinates.selectedIndex, $sizeX.valueAsNumber, $sizeY.valueAsNumber)
     $gridSize.hidden = $laserCoordinates.selectedIndex !== 0
-
   }
 
-  runCycle() {
+  runCycle(delta) {
     if (this.#running && this.#runtimeError == null) {
-      this.handleError(() => this.projector.render())
+      this.handleError(() => this.projector.render(delta))
     }
-    if (this.#running) requestAnimationFrame(() => this.runCycle())
+    if (this.#running) requestAnimationFrame((delta) => this.runCycle(delta))
   }
 }
 

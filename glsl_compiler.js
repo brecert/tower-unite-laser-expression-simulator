@@ -9,21 +9,24 @@ const VERTEX_SHADER = `
     #version 300 es
     precision mediump float;
 
-    const float pi = 3.14159;
-    const float tau = 6.28318;
+    in vec2 coord;
+    in float index;
 
-    in vec3 v_coord_index;
+    in vec3 colorIn;
+    out vec3 colorOut;
     
-    uniform sampler2D u_texture;
+    in vec2 coordIn;
+    out vec2 coordOut;
+    
+    uniform vec2 scale;
+    uniform float delta;
+    uniform float rotation;
+    
     uniform float time;
     uniform float count;
     uniform float projectionStartTime;
+    
     uniform float random;
-    uniform vec3 u_transform;
-
-    out float h;
-    out float s;
-    out float v;
 
     float lerp(float frac, float a, float b) {
         return mix(a, b, frac);
@@ -37,35 +40,34 @@ const VERTEX_SHADER = `
         return random;
     }
 
+    const float pi = 3.14159;
+    const float tau = 6.28318;
+
     void main () {
-        float x = v_coord_index.x;
-        float y = v_coord_index.y;
-        float index = v_coord_index.z;
         float fraction = index / count;
         float projectionTime = time - projectionStartTime;
 
-        float x1 = 0.0;
-        float y1 = 0.0;
+        float x = coord.x;
+        float y = coord.y;
 
-        h = 0.0;
-        s = 0.0;
-        v = 1.0;
+        float x1 = coordIn.x;
+        float y1 = coordIn.y;
+        
+        float h = colorIn.x;
+        float s = colorIn.y;
+        float v = iif(float(colorIn.z==0.0), 1.0, colorIn.z);
 
         {{SHADER}}
-        
-        h = h - (float(h<0.0) * 120.0);
-        h = h / 360.0;
-        
-        vec2 scale = u_transform.xy;
-        float angle = u_transform.z;
-        
-        float radians = angle * pi / 180.0;
+                        
+        float radians = rotation * pi / 180.0;
         vec2 rotation = vec2(sin(radians), cos(radians));
         
-        gl_Position = vec4(x1, y1, 0.0, 1.0);
+        coordOut = vec2(x1, y1);
+        colorOut = vec3(h, s, v);
 
-        gl_Position.xy = gl_Position.xy / 200.0;
-        gl_Position.xy = gl_Position.xy * scale;
+        gl_Position = vec4(coordOut, 0.0, 1.0);
+
+        gl_Position.xy = (gl_Position.xy / 200.0) * scale;
         
         gl_Position.xy = vec2(
             gl_Position.x * rotation.y + gl_Position.y * rotation.x,
@@ -73,6 +75,9 @@ const VERTEX_SHADER = `
         );
 
         gl_PointSize = 9.0;
+
+        colorOut.y = clamp(colorOut.y, 0.0, 1.0);
+        colorOut.z = clamp(colorOut.z, 0.0, 1.0);
     }
 `.trim()
 
@@ -80,10 +85,7 @@ const FRAGMENT_SHADER = `
     #version 300 es
     precision mediump float;
     
-    in float h;
-    in float s;
-    in float v;
-    
+    in vec3 colorOut;
     out vec4 fragColor;
 
     vec3 hsv2rgb(vec3 c) {
@@ -91,9 +93,16 @@ const FRAGMENT_SHADER = `
         vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
         return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
     }
+    
+    void main() {
+        vec3 color = colorOut;
+        color.x -= float(color.x < 0.0) * 12.0;
+        color.x /= 360.0;
 
-    void main () {
-        fragColor = vec4(hsv2rgb(vec3(h, clamp(s, 0.0, 1.0), clamp(v, 0.0, 1.0))), v);
+        color.y = clamp(color.y, 0.0, 1.0);
+        color.z = clamp(color.z, 0.0, 1.0);
+
+        fragColor = vec4(hsv2rgb(color), 0.0);
     }
 `.trim()
 
