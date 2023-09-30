@@ -120,6 +120,8 @@ const fmtNumber = (num) => Number.isInteger(num)
 export class GLSLCompiler {
     /** @type {Map<string, number>} */
     knownVars = new Map()
+    /** @type {Set<string>} */
+    seenOutputs = new Set()
     usedDynamicVar = false;
 
     /** @param {import('./types.d.ts').Expression} ast  */
@@ -185,6 +187,7 @@ export class GLSLCompiler {
                 let expression = this.compileRaw(expr)
 
                 if (isInitialVar) this.knownVars.set(name, this.knownVars.size)
+                if (isOutput(name)) this.seenOutputs.add(name)
 
                 // todo: optimize variables names to keep track of stacksize and pull from that as needed
                 return `${isInitialVar ? 'float ' : ''}${assignName} = ${expression};\n`
@@ -258,6 +261,9 @@ export class GLSLCompiler {
                     }
                 }
                 else if (isOutput(name)) {
+                    if(!this.seenOutputs.has(name)) {
+                        throw new Error(`Outputs must be assigned to first before being used to avoid bugs`)
+                    }
                     getName = getOutputName(name)
                 }
 
