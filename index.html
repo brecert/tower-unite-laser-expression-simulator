@@ -158,17 +158,18 @@ s = v;
             Run
             <input type="checkbox" id="run" checked>
           </label>
+          <!-- we step by 0.01 because that's as much as tu allows -->
           <label class="flex-1">
             Scale X
-            <input class="input-fill" type="range" min="-1" max="1" step="any" value="1" id="scaleX">
+            <input class="input-fill" type="range" min="-1" max="1" step="0.01" value="1" id="scaleX">
           </label>
           <label class="flex-1">
             Scale Y
-            <input class="input-fill" type="range" min="-1" max="1" step="any" value="1" id="scaleY">
+            <input class="input-fill" type="range" min="-1" max="1" step="0.01" value="1" id="scaleY">
           </label>
           <label class="flex-1">
             Rotation
-            <input class="input-fill" type="range" min="0" max="1" step="any" value="0" id="rotation">
+            <input class="input-fill" type="range" min="0" max="1" step="0.01" value="0" id="rotation">
           </label>
           <!-- maybe menu? -->
           <button type="button" class="flex-end" style="flex: 0; flex-basis: 8ch; white-space: nowrap;" onclick="helpModal.showModal()">🛈 Help</button>

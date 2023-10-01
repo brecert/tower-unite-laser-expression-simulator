@@ -90,5 +90,21 @@ withInput('rotation', (el) => state.projector.rotation = el.valueAsNumber * 360)
 withInput('scaleX', (el) => state.projector.scaleX = el.valueAsNumber)
 withInput('scaleY', (el) => state.projector.scaleY = el.valueAsNumber)
 
+const $outputActions = $('#outputActions')
+const inputs = [$('#rotation'), $('#scaleX'), $('#scaleY')]
+
+for (const input of inputs) {
+  input.parentElement.onclick = (e) => {
+    if (e.target === input.parentElement) input.type = 'number'
+  }
+  input.onblur = () => input.type = 'range'
+}
+
+$outputActions.addEventListener('submit', e => {
+  e.preventDefault()
+  inputs.forEach(input => input.type = 'range')
+})
+
+
 window.onblur = () => state.running = false
 window.onfocus = () => state.running = run.checked
