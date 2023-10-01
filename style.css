@@ -13,6 +13,7 @@
   --textarea-bg: var(--bg-back-2);
   
   font-family: sans-serif, system-ui;
+  box-sizing: border-box;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -29,7 +30,9 @@
   }
 }
 
-* { box-sizing: border-box; }
+*, *::before, ::after {
+  box-sizing: inherit;
+}
 
 textarea {
   background: var(--textarea-bg);
@@ -41,7 +44,18 @@ dialog {
 
   width: 1024px;
   min-height: 418px;
-  align-self: center;
+  max-height: 90vh;
+
+  border-radius: 4px;
+  padding: 0ch;
+}
+
+dialog > div {
+  padding: 4ch;
+}
+
+dialog h1 {
+  margin-top: 0;
 }
 
 [hidden] {
@@ -155,7 +169,7 @@ main > * {
   
   contain: strict;
   display: grid;
-  place-content: center;
+  place-items: center;
 
   background: var(--bg-back-2);
   
@@ -193,8 +207,8 @@ main > * {
 }
 
 @media (max-aspect-ratio: 2/3) {
-  body {
-    flex-direction: column;
+  main {
+    flex-direction: column-reverse;
   }
 
   .input {
