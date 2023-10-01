@@ -70,7 +70,7 @@ export class WebGLProjector {
     /** @param {Float32Array} pointData  */
     updateShape(pointData) {
         const gl = this.gl
-        const pointsObject = { v_coord_index: { data: pointData, numComponents: 3 } };
+        const pointsObject = { coordIndex: { data: pointData, numComponents: 3 } };
         this.#pointCount = pointData.length / 3
         this.#pointsBuffer = twgl.createBufferInfoFromArrays(gl, pointsObject);
         this.#projectionStartTime = dayInSeconds()
@@ -90,7 +90,7 @@ export class WebGLProjector {
             count: this.#pointCount,
             projectionStartTime: this.#projectionStartTime,
             random: Math.random(),
-            u_transform: [this.scaleX, this.scaleY, this.rotation]
+            transform: [this.scaleX, this.scaleY, this.rotation]
         }
     }
 

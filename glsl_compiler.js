@@ -11,15 +11,15 @@ const VERTEX_SHADER = `
 
     const float pi = 3.14159;
     const float tau = 6.28318;
-
-    in vec3 v_coord_index;
     
-    uniform sampler2D u_texture;
+    uniform vec3 transform;
+
     uniform float time;
     uniform float count;
     uniform float projectionStartTime;
     uniform float random;
-    uniform vec3 u_transform;
+
+    in vec3 coordIndex;
 
     out float h;
     out float s;
@@ -38,9 +38,9 @@ const VERTEX_SHADER = `
     }
 
     void main () {
-        float x = v_coord_index.x;
-        float y = v_coord_index.y;
-        float index = v_coord_index.z;
+        float x = coordIndex.x;
+        float y = coordIndex.y;
+        float index = coordIndex.z;
         float fraction = index / count;
         float projectionTime = time - projectionStartTime;
 
@@ -56,8 +56,8 @@ const VERTEX_SHADER = `
         h = h - (float(h<0.0) * 120.0);
         h = h / 360.0;
         
-        vec2 scale = u_transform.xy;
-        float angle = u_transform.z;
+        vec2 scale = transform.xy;
+        float angle = transform.z;
         
         float radians = angle * pi / 180.0;
         vec2 rotation = vec2(sin(radians), cos(radians));
