@@ -53,6 +53,7 @@ const VERTEX_SHADER = `
 
         {{SHADER}}
         
+        h = mod(h, 360.0);
         h = h - (float(h<0.0) * 120.0);
         h = h / 360.0;
         
