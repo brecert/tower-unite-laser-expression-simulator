@@ -18,6 +18,7 @@ const $laserCoordinates = $('#laserCoordinates')
 const $gridSize = $('#gridSize')
 const $sizeX = $('#sizeX')
 const $sizeY = $('#sizeY')
+const $icon = $('link[rel="icon"]')
 
 
 // this is bad but I was curious how it'd work out
@@ -29,8 +30,15 @@ class State {
   set running(value) {
     let startRunning = this.#running === false && value === true
     this.#running = value
+
     if (startRunning) {
       this.runCycle()
+    }
+
+    if (this.#running) {
+      $icon.href = $icon.href.replace('%23333', '%23EB3D1C')
+    } else {
+      $icon.href = $icon.href.replace('%23EB3D1C', '%23333')
     }
   }
 
