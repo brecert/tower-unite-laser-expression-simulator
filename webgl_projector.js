@@ -47,6 +47,9 @@ export class WebGLProjector {
      */
     constructor(canvas, script, shape = RectangularGrid, cols = 20, rows = 20) {
         let gl = canvas.getContext('webgl2', { depth: false, antialiasing: false, alpha: false });
+        if (gl == null) {
+            throw new Error("Unable to initialize WebGL. Your browser or machine may not support it.")
+        }
         this.gl = gl
         this.gl.enable(gl.BLEND);
         this.gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_COLOR);
