@@ -168,8 +168,9 @@ main > * {
   flex: 1;
   
   contain: strict;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   background: var(--bg-back-2);
   
