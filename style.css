@@ -120,8 +120,9 @@ main > * {
 }
 
 .actions > button {
-  display: grid;
-  align-content: end;
+  display: flex;
+  align-items: center;
+  place-content: center;
   
   height: 100%;
   width: 100%;
