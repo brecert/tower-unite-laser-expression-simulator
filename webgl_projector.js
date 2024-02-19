@@ -2,30 +2,15 @@ import * as twgl from 'https://esm.sh/v132/twgl.js@5.5.3/es2022/twgl.mjs'
 import { dayInSeconds } from './utils.js';
 import { GLSLCompiler } from './glsl_compiler.js';
 import { parse } from './parser.js';
-import {
-    rectangularGridPoints,
-    linePoints,
-    plusPoints,
-    circlePoints,
-    squarePoints,
-} from './shapes.js';
+import { rectangularGridPoints } from './shapes.js';
+import shapes from './constants/shapes.js'
 
-export const
-    RectangularGrid = 0,
-    LineShape = 1,
-    PlusShape = 2,
-    CircleShape = 3,
-    SquareShape = 4
+export const RectangularGrid = 0
 
 function getPointDataForShape(shape, cols, rows) {
     switch (shape) {
         case RectangularGrid: return rectangularGridPoints(cols, rows)
-        case LineShape: return linePoints()
-        case PlusShape: return plusPoints()
-        case CircleShape: return circlePoints()
-        case SquareShape: return squarePoints()
-        default:
-            throw new Error(`Invalid Laser Coordinates: ${shape}`)
+        default: return new Float32Array(shapes[shape - 1][1])
     }
 }
 
@@ -41,9 +26,9 @@ export class WebGLProjector {
     rotation = 0;
 
     /**
-     * @param {HTMLCanvasElement} canvas 
-     * @param {string} script 
-     * @param {number} shape 
+     * @param {HTMLCanvasElement} canvas
+     * @param {string} script
+     * @param {number} shape
      */
     constructor(canvas, script, shape = RectangularGrid, cols = 20, rows = 20) {
         let gl = canvas.getContext('webgl2', { depth: false, antialiasing: false, alpha: false });

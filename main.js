@@ -1,4 +1,5 @@
 import { WebGLProjector } from './webgl_projector.js'
+import shapes from './constants/shapes.js'
 
 const $ = (query) => document.querySelector(query)
 
@@ -20,6 +21,11 @@ const $sizeX = $('#sizeX')
 const $sizeY = $('#sizeY')
 const $icon = $('link[rel="icon"]')
 
+for (const [name] of shapes) {
+  const $option = document.createElement('option')
+  $option.textContent = name
+  $laserCoordinates.append($option)
+}
 
 // this is bad but I was curious how it'd work out
 class State {
@@ -75,7 +81,6 @@ class State {
   updateShape(type, cols, rows) {
     this.projector.useShape($laserCoordinates.selectedIndex, $sizeX.valueAsNumber, $sizeY.valueAsNumber)
     $gridSize.hidden = $laserCoordinates.selectedIndex !== 0
-
   }
 
   runCycle() {
